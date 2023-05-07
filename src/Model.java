@@ -63,6 +63,10 @@ public class Model {
             }
             this.row = this.groundTruth.size();
             this.col = this.groundTruth.get(0).size();
+
+            for(int i=0;i<this.groundTruth.size();i++)
+                if(this.groundTruth.get(i).size() != col)
+                    throw new IOException("File is Error(Column Error)");
         }catch (IOException e){
             e.printStackTrace();
             System.exit(0);
