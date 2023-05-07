@@ -7,16 +7,7 @@ import java.util.Iterator;
 
 
 public class Model {
-    static final int AIR = '0';
-    static final int WALL = '1';
-    static final int UNKNOWN = '2';
-    static final int BRANCH = '3';
-    static final int PLAYER = '4';
 
-    enum ImgOutput{
-        GroundTruth,
-        Our
-    }
 
     private String readPath = null;
     private String writePath = null;
@@ -56,7 +47,7 @@ public class Model {
                     count++;
                     this.groundTruth.add(count,new ArrayList<Integer>());
                 }
-                else if(ch == AIR || ch == WALL)
+                else if(ch == Define.AIR || ch == Define.WALL)
                     this.groundTruth.get(count).add(ch);
                 else if( ch > 32  && ch != 127) // 제어 문자, 빈 문자, 0,1 이외의 값이 들어오면 오류 처리
                     throw new IOException("File is Error(Error Character) : " +  (char)ch);
@@ -82,10 +73,10 @@ public class Model {
             for(int i=0;i<row;i++){
                 our.add(i,new ArrayList<Integer>());
                 for(int j=0;j<col;j++)
-                    our.get(i).add(UNKNOWN);
+                    our.get(i).add(Define.UNKNOWN);
             }
 
-            our.get(0).set(1,BRANCH);
+            our.get(0).set(1,Define.BRANCH);
 
         }catch (IOException e){
             e.printStackTrace();
@@ -93,13 +84,13 @@ public class Model {
         }
     }
 
-    public void ImgWrite(ImgOutput imgOutput){
+    public void ImgWrite(Define.ImgOutput imgOutput){
         try{
             if(this.writePath == null)
                 throw new IOException("Need to set variable 'writePath'");
-            if(groundTruth == null && imgOutput == ImgOutput.GroundTruth)
+            if(groundTruth == null && imgOutput == Define.ImgOutput.GroundTruth)
                 throw new IOException("Need to run 'fileRead'");
-            if(our == null && imgOutput == ImgOutput.Our)
+            if(our == null && imgOutput == Define.ImgOutput.Our)
                 throw new IOException("Need to run 'buildOur'");
 
             BufferedImage img = new BufferedImage(col, row, BufferedImage.TYPE_3BYTE_BGR);
@@ -124,19 +115,19 @@ public class Model {
                 while(colIT.hasNext()){
                     element = colIT.next();
                     switch (element){ // xx RR GG BB
-                        case AIR:
+                        case Define.AIR:
                             img.setRGB(count%col,count/col,0x00ffffff); // white
                             break;
-                        case WALL:
+                        case Define.WALL:
                             img.setRGB(count%col,count/col,0x00000000); // black
                             break;
-                        case BRANCH:
+                        case Define.BRANCH:
                             img.setRGB(count%col,count/col,0x0066ff66); // Green
                             break;
-                        case UNKNOWN:
+                        case Define.UNKNOWN:
                             img.setRGB(count%col,count/col,0x00444444); // Gray
                             break;
-                        case PLAYER:
+                        case Define.PLAYER:
                             img.setRGB(count%col,count/col,0x00ff0000); // RED
                             break;
                     }

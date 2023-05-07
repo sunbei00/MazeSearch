@@ -5,8 +5,8 @@ public class Main {
         model.buildOur();
 
         model.setWritePath("GroundTruth.bmp");
-        model.ImgWrite(Model.ImgOutput.GroundTruth);
+        model.ImgWrite(Define.ImgOutput.GroundTruth);
         model.setWritePath("Our.bmp");
-        model.ImgWrite(Model.ImgOutput.Our);
+        model.ImgWrite(Define.ImgOutput.Our);
     }
 }
