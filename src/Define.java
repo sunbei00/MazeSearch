@@ -9,4 +9,23 @@ public class Define {
         GroundTruth,
         Our
     }
+
+    static class Block{
+
+        public int type;
+        public int priority; // using in branch
+
+        public Block(){
+            this.type = UNKNOWN;
+            this.priority = -1;
+        }
+        public Block(int type){
+            this.type = type;
+            this.priority = -1;
+        }
+        public Block(int type, int priority){
+            this.type = type;
+            this.priority = priority;
+        }
+    }
 }
