@@ -4,9 +4,9 @@ public class Main {
         model.fileRead();
         model.buildOur();
 
-        model.setWritePath("GroundTruth.bmp");
+        model.setWritePath("./GroundTruth.bmp");
         model.ImgWrite(Define.ImgOutput.GroundTruth);
-        model.setWritePath("Our.bmp");
+        model.setWritePath("./Our.bmp");
         model.ImgWrite(Define.ImgOutput.Our);
     }
 }
