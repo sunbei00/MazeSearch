@@ -4,6 +4,7 @@ public class Define {
     static final int UNKNOWN = '2';
     static final int BRANCH = '3';
     static final int PLAYER = '4';
+    static final int GOING = '5';
 
     enum ImgOutput{
         GroundTruth,

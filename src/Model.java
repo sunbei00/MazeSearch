@@ -130,6 +130,9 @@ public class Model {
                         case Define.PLAYER:
                             img.setRGB(count%col,count/col,0x00ff0000); // RED
                             break;
+                        case Define.GOING:
+                            img.setRGB(count%col,count/col,0x0000ff00); // Blue
+                            break;
                     }
                     count++;
                 }
