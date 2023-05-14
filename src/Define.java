@@ -1,12 +1,12 @@
 public class Define {
-    static final int AIR = '0';
-    static final int WALL = '1';
-    static final int UNKNOWN = '2';
-    static final int BRANCH = '3';
-    static final int PLAYER = '4';
-    static final int GOING = '5';
-    static final int GOAL = '6';
-    static final int BREAK = '7';
+    static final int AIR = '0';         // (둘다에서) 이동할 수 있는 공간. 이미 이동해 본 공간 
+    static final int WALL = '1';        // (둘다에서) 벽
+    static final int UNKNOWN = '2';     // (our Map에서) 모르는 공간
+    static final int BRANCH = '3';      // (our Map에서) 분기점 위치
+    static final int PLAYER = '4';      // (our Map에서) 플레이어 위치
+    static final int GOING = '5';       // (our Map에서) 플레이어의 상하좌우에 위치하면 반드시 플레이어가 이동
+    static final int GOAL = '6';        // (our Map에서) Move 또는 Scan 시 발견하는 목적지
+    static final int BREAK = '7';       // (GroundTruth에서) BreakItem으로 부신 위치
 
     enum ImgOutput{
         GroundTruth,
