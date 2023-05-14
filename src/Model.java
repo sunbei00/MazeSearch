@@ -76,8 +76,13 @@ public class Model {
                     this.our.get(i).add(new Define.Block(Define.UNKNOWN));
             }
 
-            this.our.get(0).set(1,new Define.Block(Define.BRANCH));
+            Game game = new Game(this);
 
+            game.useScan(new Define.Pos(16,16));
+            for(int i=0;i<100;i++){
+                game.Move();
+                game.useBreak(new Define.Pos(3,2));
+            }
         }catch (IOException e){
             e.printStackTrace();
             System.exit(1);
@@ -131,7 +136,13 @@ public class Model {
                             img.setRGB(count%col,count/col,0x00ff0000); // RED
                             break;
                         case Define.GOING:
-                            img.setRGB(count%col,count/col,0x0000ff00); // Blue
+                            img.setRGB(count%col,count/col,0x000000ff); // Blue
+                            break;
+                        case Define.GOAL:
+                            img.setRGB(count%col,count/col,0x00660066); // purple
+                            break;
+                        case Define.BREAK:
+                            img.setRGB(count%col,count/col,0x00ff00cc); // pink
                             break;
                     }
                     count++;
@@ -144,5 +155,12 @@ public class Model {
             e.printStackTrace();
             System.exit(0);
         }
+    }
+
+    public int getRow(){
+        return this.row;
+    }
+    public int getCol(){
+        return this.col;
     }
 }
