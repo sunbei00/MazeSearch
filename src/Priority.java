@@ -1,61 +1,58 @@
+import javax.xml.stream.Location;
 import java.util.ArrayList;
 
 public class Priority {
-    private Define.Block location;
-    private Define.Block goal;
+    // 각 브랜치 위치 & 각 브랜치에서 현재 위치까지의 거리
+    public ArrayList<Define.DestInfo> destInfos;
 
-    private ArrayList<Define.BranchBlock> branchBlocks;
-    public Priority(ArrayList<Define.BranchBlock> branchBlocks){
-        this.branchBlocks = branchBlocks;
+    public Define.Location location = null;
+    public Priority(ArrayList<Define.DestInfo> destInfos){
+        this.destInfos = destInfos;
     }
 
-    public Define.Block HighestPriorityBranch(ArrayList<Define.BranchBlock> branchBlocks) {
-        Define.Block selectBranch = null;
+    public Define.Location HighestPriorityBranch() {
+        for (Define.DestInfo dest : destInfos) {
+            // 현재 위치를 기준으로 각 브랜치까지의 거리
+            int destDistance = dest.distance;
 
-        for(ArrayList<Define.Block> row : map) {
-            for(Define.Block block : row) {
-                if(block.type == Define.BRANCH) {
-                    //Branch 우선순위 갱신
+            // 브랜치 좌표 값 => 상하좌우 우선순위 계산 위해
+            Define.BranchBlock branchBlock = dest.branchBlock;
+            int x = branchBlock.x;
+            int y = branchBlock.y;
 
-                    //현재 분기점일 경우, 상하좌우 'Air(?)' 중 높은 우선순위로 갱신
-                    //Block의 위치가 index 로 되어 있음 => (row, column) 일 경우 용이
-                    if(block == location){
+            int maxPriority = -1000000000;
 
-                    }
 
-                    //이전 분기점일 경우
-                    else{
-                        block.priority = calculate_priority(block, goal);
-                    }
-
-                    //높은 우선순위 Branch 선택
-                    if(selectBranch == null || block.priority > selectBranch.priority) {
-                        selectBranch = block;
-                    }
+            // branchBlock 을 기준으로 상하좌우 경로가 있을 때 계산
+            // branchBlock 의 상하좌우 우선순위 (해당 위치 & 현재 위치부터 branchBlock 까지의 거리)
+            if (branchBlock.up.exist == true) {
+                branchBlock.up.priority = -10 * Math.min(x, y - 1) - destDistance;
+                if (maxPriority < branchBlock.up.priority) {
+                    location.x = x;
+                    location.y = y - 1;
+                }
+            } else if (branchBlock.down.exist == true) {
+                branchBlock.down.priority = -10 * Math.min(x, y + 1) - destDistance;
+                if (maxPriority < branchBlock.down.priority) {
+                    location.x = x;
+                    location.y = y + 1;
+                }
+            } else if (branchBlock.right.exist == true) {
+                branchBlock.right.priority = -10 * Math.min(x + 1, y) - destDistance;
+                if (maxPriority < branchBlock.right.priority) {
+                    location.x = x + 1;
+                    location.y = y;
+                }
+            } else if (branchBlock.left.exist == true) {
+                branchBlock.left.priority = -10 * Math.min(x - 1, y) - destDistance;
+                if (maxPriority < branchBlock.left.priority) {
+                    location.x = x - 1;
+                    location.y = y;
                 }
             }
         }
 
-        // 현재 브랜치로 계속 이동하는 경우
-        if(selectBranch == location){
-            //상하좌우에 block 중, 높은 우선순위 return
-        }
-
         // 이전 브랜치로 이동하는 경우
-        return selectBranch;
-    }
-
-    private int calculate_priority(Define.Block block, Define.Block goal) {
-        //도착지를 못 찾았을 때
-        if(goal.type == '2'){
-
-        }
-
-        //도착지를 찾았을 때
-        else{
-
-        }
-
-        return 0;
+        return location;
     }
 }
