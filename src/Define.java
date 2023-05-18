@@ -121,5 +121,15 @@ public class Define {
 
     }
 
+    public static class DestInfo{
+        public BranchBlock branchBlock = null;
+        public int distance;
+
+        public DestInfo(BranchBlock branchBlock, int distance){
+            this.branchBlock = branchBlock;
+            this.distance = distance;
+        }
+    }
+
     public static HashMap<Integer, BranchBlock> branchBlockHashMap = new HashMap<Integer, BranchBlock>();
 }
