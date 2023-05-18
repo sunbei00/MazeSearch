@@ -41,6 +41,10 @@ public class Define {
             this.x = 1;
             this.y = 0;
         }
+        public void setValue(int x, int y){
+            this.x = x;
+            this.y = y;
+        }
     }
 
     final static Define.Pos[] boundary = new Define.Pos[]{
@@ -113,6 +117,8 @@ public class Define {
         public int hashCode() {
             return x*10000 + y;
         }
+
+
     }
 
     public static HashMap<Integer, BranchBlock> branchBlockHashMap = new HashMap<Integer, BranchBlock>();

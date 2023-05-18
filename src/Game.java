@@ -7,8 +7,9 @@ public class Game {
     private boolean breakItem;
     private Define.Pos breakPos;
     private Model model;
-
     private Define.Pos playerPos = new Define.Pos();
+
+    private static Define.Pos look = new Define.Pos(); // optimize for memory (Temp)
 
     public boolean isEnergy(){
         if(this.energy > 0)
@@ -41,8 +42,9 @@ public class Game {
 
         this.playerPos.x = 1;
         this.playerPos.y = 0;
-        this.model.our.get(this.playerPos.y).set(this.playerPos.x,new Define.Block(Define.PLAYER));
+        this.model.our.get(this.playerPos.y).set(this.playerPos.x, new Define.Block(Define.PLAYER));
         lookAround();
+        Define.branchBlockHashMap.put(Define.hashCode(1,0), new Define.BranchBlock(1,0));
     }
 
     private void calcIndex(Define.Pos pos){ // index error 방지
@@ -56,11 +58,9 @@ public class Game {
             pos.y = this.model.getRow() - 1;
     }
 
-    static ArrayList<Define.Pos> posArrayList = new ArrayList<>(); // for Optimization
     private void lookAround(){
-        posArrayList.clear();
         for(Define.Pos p : Define.boundary){
-            Define.Pos look = new Define.Pos(this.playerPos.x, this.playerPos.y);
+            look.setValue(this.playerPos.x, this.playerPos.y);
             look.x += p.x;
             look.y += p.y;
             calcIndex(look);
@@ -69,13 +69,9 @@ public class Game {
             if(this.model.groundTruth.get(look.y).get(look.x).type == Define.WALL) // 벽 표시
                 this.model.our.get(look.y).set(look.x, new Define.Block(Define.WALL));
             if(this.model.groundTruth.get(look.y).get(look.x).type == Define.AIR || this.model.groundTruth.get(look.y).get(look.x).type == Define.BREAK){
-                this.posArrayList.add(look); // GOING 위치 표시
-                this.model.our.get(look.y).set(look.x, new Define.Block(Define.GOING));
+                this.model.our.get(look.y).set(look.x, new Define.Block(Define.AIR));
             }
         }
-        if(posArrayList.size() >= 2)
-            for(Define.Pos p : posArrayList) // 주변에 GOING이 2개 이상이면 분기점으로 판단.
-                this.model.our.get(p.y).set(p.x, new Define.Block(Define.BRANCH));
     }
 
     public void Move(){
@@ -86,9 +82,8 @@ public class Game {
             System.exit(0);
         }
 
-        posArrayList.clear();
         for(Define.Pos p : Define.boundary){
-            Define.Pos look = new Define.Pos(this.playerPos.x, this.playerPos.y);
+            look.setValue(this.playerPos.x, this.playerPos.y);
             look.x += p.x;
             look.y += p.y;
             calcIndex(look);

@@ -12,7 +12,6 @@ public class Model {
     private int row = -1;
     private int col = -1;
     public ArrayList<ArrayList<Define.Block>> groundTruth = null;
-    // public으로 할지, private으로 할지는 고민해보기
     public ArrayList<ArrayList<Define.Block>> our = null;
 
 
@@ -126,7 +125,7 @@ public class Model {
                         case Define.WALL:
                             img.setRGB(count%col,count/col,0x00000000); // black
                             break;
-                        case Define.BRANCH:
+                        case Define.BRANCH_BLOCK:
                             img.setRGB(count%col,count/col,0x0066ff66); // Green
                             break;
                         case Define.UNKNOWN:
