@@ -1,12 +1,16 @@
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class Define {
     static final int AIR = '0';         // (둘다에서) 이동할 수 있는 공간. 이미 이동해 본 공간 
     static final int WALL = '1';        // (둘다에서) 벽
     static final int UNKNOWN = '2';     // (our Map에서) 모르는 공간
-    static final int BRANCH = '3';      // (our Map에서) 분기점 위치
+    static final int BRANCH_BLOCK = '3';// (our Map에서) 분기점 위치
     static final int PLAYER = '4';      // (our Map에서) 플레이어 위치
-    static final int GOING = '5';       // (our Map에서) 플레이어의 상하좌우에 위치하면 반드시 플레이어가 이동
-    static final int GOAL = '6';        // (our Map에서) Move 또는 Scan 시 발견하는 목적지
-    static final int BREAK = '7';       // (GroundTruth에서) BreakItem으로 부신 위치
+    static final int GOAL = '5';        // (our Map에서) Move 또는 Scan 시 발견하는 목적지
+    static final int BREAK = '6';       // (GroundTruth에서) BreakItem으로 부신 위치
+
 
     enum ImgOutput{
         GroundTruth,
@@ -16,21 +20,13 @@ public class Define {
     static class Block{
 
         public int type;
-        public int priority; // using in branch
 
         public Block(){
             this.type = UNKNOWN;
-            this.priority = -1;
         }
         public Block(int type){
             this.type = type;
-            this.priority = -1;
         }
-        public Block(int type, int priority){
-            this.type = type;
-            this.priority = priority;
-        }
-
     }
 
     static class Pos{
@@ -52,6 +48,11 @@ public class Define {
             new Define.Pos(0,1),  // 하
             new Define.Pos(-1,0), // 좌
             new Define.Pos(1,0),  // 우
+
+            new Define.Pos(-1,-1), // 좌상
+            new Define.Pos(-1,1),  // 좌하
+            new Define.Pos(1,-1), // 우상
+            new Define.Pos(1,1),  // 우하
     };
     final static Define.Pos[] sacnBoundary = new Define.Pos[]{
             new Define.Pos(-2,-2),
@@ -80,4 +81,39 @@ public class Define {
             new Define.Pos(2,1),
             new Define.Pos(2,2),
     };
+
+    public static class orientation{
+        boolean exist;
+        int distance;
+        BranchBlock linkedBranch;
+        public orientation(boolean exist, int distance, BranchBlock linkedBranch){
+            this.exist = exist;
+            this.distance = distance;
+            this.linkedBranch = linkedBranch;
+        }
+    }
+
+    public static int hashCode(int x,int y) {
+        return x*10000 + y;
+    }
+
+    public static class BranchBlock{
+
+        public orientation up = new orientation(false,-1, null);
+        public orientation down = new orientation(false,-1, null);
+        public orientation left = new orientation(false,-1, null);
+        public orientation right = new orientation(false,-1, null);
+        public int x;
+        public int y;
+        public BranchBlock(int x,int y){
+            this.x = x;
+            this.y = y;
+        }
+        @Override
+        public int hashCode() {
+            return x*10000 + y;
+        }
+    }
+
+    public static HashMap<Integer, BranchBlock> branchBlockHashMap = new HashMap<Integer, BranchBlock>();
 }

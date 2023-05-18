@@ -78,7 +78,7 @@ public class Model {
 
             Game game = new Game(this);
 
-            game.useScan(new Define.Pos(16,16));
+            game.useScan(new Define.Pos(10,10));
             for(int i=0;i<100;i++){
                 game.Move();
                 game.useBreak(new Define.Pos(3,2));
@@ -134,9 +134,6 @@ public class Model {
                             break;
                         case Define.PLAYER:
                             img.setRGB(count%col,count/col,0x00ff0000); // RED
-                            break;
-                        case Define.GOING:
-                            img.setRGB(count%col,count/col,0x000000ff); // Blue
                             break;
                         case Define.GOAL:
                             img.setRGB(count%col,count/col,0x00660066); // purple
