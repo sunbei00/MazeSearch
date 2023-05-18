@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Game {
@@ -8,8 +9,11 @@ public class Game {
     private Define.Pos breakPos;
     private Model model;
     private Define.Pos playerPos = new Define.Pos();
-
     private static Define.Pos look = new Define.Pos(); // optimize for memory (Temp)
+    private static Define.Pos prevPos = new Define.Pos(); // Temp for move
+    private static Define.Pos movePos = new Define.Pos(); // Temp for moveAround
+    private static Define.BranchBlock prevBranchBlock = null; // Temp for move
+    private static int accumulateDistance = 0;
 
     public boolean isEnergy(){
         if(this.energy > 0)
@@ -40,11 +44,15 @@ public class Game {
         this.mana = 3.0f;
         this.breakItem = true;
 
-        this.playerPos.x = 1;
-        this.playerPos.y = 0;
-        this.model.our.get(this.playerPos.y).set(this.playerPos.x, new Define.Block(Define.PLAYER));
+
+        this.playerPos.setValue(1,0);
+        this.model.our.get(this.playerPos.y).get(this.playerPos.x).type = Define.PLAYER;
         lookAround();
-        Define.branchBlockHashMap.put(Define.hashCode(1,0), new Define.BranchBlock(1,0));
+        Define.branchBlockHashMap.clear();
+        Define.branchBlockHashMap.put(Define.HashCode(1,0), new Define.BranchBlock(1,0));
+        prevPos.setValue(1,0);
+        prevBranchBlock = Define.branchBlockHashMap.get(0);
+        accumulateDistance = 0;
     }
 
     private void calcIndex(Define.Pos pos){ // index error 방지
@@ -67,11 +75,118 @@ public class Game {
             if(this.model.our.get(look.y).get(look.x).type != Define.UNKNOWN) // 이미 알고있으면 계산x
                 continue;
             if(this.model.groundTruth.get(look.y).get(look.x).type == Define.WALL) // 벽 표시
-                this.model.our.get(look.y).set(look.x, new Define.Block(Define.WALL));
+                this.model.our.get(look.y).get(look.x).type = Define.WALL;
             if(this.model.groundTruth.get(look.y).get(look.x).type == Define.AIR || this.model.groundTruth.get(look.y).get(look.x).type == Define.BREAK){
-                this.model.our.get(look.y).set(look.x, new Define.Block(Define.AIR));
+                this.model.our.get(look.y).get(look.x).type = Define.AIR;
             }
         }
+    }
+
+    private boolean isFinish(){
+        if(playerPos.x == 1 && playerPos.y == 0)
+            return false;
+        if(playerPos.x == 0 || playerPos.x == this.model.getCol()-1)
+            if(playerPos.y == 0 || playerPos.y == this.model.getRow()-1)
+                return true;
+        return false;
+    }
+
+    private boolean isBranchBlock(){
+         /*
+            경우의 수 ( n := 길의 수 )
+            i)   n > 3   : Branch Block으로 만들어줘야 함. -> true 반환
+            ii)  n == 2  : 이동할 수 있음                 -> false 반환
+            iii) n = 1   : 막 다른 골목                   -> true 반환
+        */
+        int i = 0;
+        for (Define.Pos p : Define.moveBoundary) {
+            look.setValue(this.playerPos.x, this.playerPos.y);
+            look.x += p.x;
+            look.y += p.y;
+
+            calcIndex(look);
+            if (this.model.our.get(look.y).get(look.x).type == Define.AIR)
+                i++;
+        }
+
+        switch (i){
+            case 2:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    private void moveAround() {
+        // Branch Block이 아니라는 가정이 필수!! 잊지말기!!
+        movePos.setValue(playerPos.x, playerPos.y);
+        for (Define.Pos p : Define.moveBoundary) {
+            look.setValue(this.playerPos.x, this.playerPos.y);
+            look.x += p.x;
+            look.y += p.y;
+            calcIndex(look);
+            if (this.model.our.get(look.y).get(look.x).type == Define.AIR) {
+                if (look.isEquals(prevPos)) // 이전에 이동한 위치일 시
+                    continue;
+                movePos.setValue(look.x, look.y);
+                return;
+            }
+        }
+    }
+
+    private void setNewBranchBlock(Define.BranchBlock branchBlock){
+        int x_sub = playerPos.x-prevPos.x;
+        int y_sub = playerPos.y-prevPos.y;
+
+        if(x_sub == 1){
+            // left
+            branchBlock.left.distance = accumulateDistance;
+            branchBlock.left.exist = true;
+            branchBlock.left.linkedBranch = prevBranchBlock;
+        }
+        if(x_sub == -1){
+            // right
+            branchBlock.right.distance = accumulateDistance;
+            branchBlock.right.exist = true;
+            branchBlock.right.linkedBranch = prevBranchBlock;
+        }
+        if(y_sub == -1){
+            // down
+            branchBlock.down.distance = accumulateDistance;
+            branchBlock.down.exist = true;
+            branchBlock.down.linkedBranch = prevBranchBlock;
+        }
+        if(y_sub == 1){
+            // up
+            branchBlock.up.distance = accumulateDistance;
+            branchBlock.up.exist = true;
+            branchBlock.up.linkedBranch = prevBranchBlock;
+        }
+        for (Define.Pos p : Define.moveBoundary) {
+            look.setValue(this.playerPos.x, this.playerPos.y);
+            look.x += p.x;
+            look.y += p.y;
+            calcIndex(look);
+            if (this.model.our.get(look.y).get(look.x).type == Define.AIR) {
+                if(p.x == 1) // right
+                    branchBlock.right.exist = true;
+                if(p.x == -1) // left
+                    branchBlock.left.exist = true;
+                if(p.y == 1) // down
+                    branchBlock.down.exist = true;
+                if(p.y == -1) // up
+                    branchBlock.up.exist = true;
+            }
+        }
+    }
+
+    void makeBranchBlock(int x,int y){
+        System.out.println("Make Branch Block");
+        Define.BranchBlock newBranchBlock = new Define.BranchBlock(playerPos.x, playerPos.y);
+        setNewBranchBlock(newBranchBlock); // make Graph
+        Define.branchBlockHashMap.put(newBranchBlock.hashCode(),newBranchBlock);
+        prevBranchBlock = newBranchBlock;
+        accumulateDistance = 0;
     }
 
     public void Move(){
@@ -79,36 +194,44 @@ public class Game {
             // GAME OVER
             // FILE WRITE
             // EXIT
+            System.out.println("!isEnergy");
             System.exit(0);
         }
-
-        for(Define.Pos p : Define.boundary){
-            look.setValue(this.playerPos.x, this.playerPos.y);
-            look.x += p.x;
-            look.y += p.y;
-            calcIndex(look);
-            if(this.model.our.get(look.y).get(look.x).type == Define.GOING)
-                posArrayList.add(look);
+        // GAME OVER : 우선순위 계산 할 Branch가 미존재 할 시 (우선순위에서 계산해야 할 듯)
+        if(isFinish()){
+            // Game Clear
+            // FILE WRITE
+            // Exit
+            System.out.println("isFinish");
+            System.exit(0);
         }
+        decreaseEnergy();
+        increaseMana();
+        accumulateDistance++;
 
-        if(posArrayList.size() == 0){
-        // 주변에 GOING이 없으면 priority 계산 후 GOING 길 만들기
-        } else {
-            decreaseEnergy();
-            increaseMana();
-            // GOING 위치로 으로 이동
-            this.model.our.get(this.playerPos.y).set(this.playerPos.x,new Define.Block(Define.AIR));
-            this.playerPos = posArrayList.get(0);
-            this.model.our.get(this.playerPos.y).set(this.playerPos.x,new Define.Block(Define.PLAYER));
-            lookAround();
+        moveAround(); // Branch Block이 아니라는 가정 필수
+        this.prevPos.setValue(this.playerPos.x,this.playerPos.y);
+        this.model.our.get(this.prevPos.y).get(this.prevPos.x).type = Define.AIR;
+        this.playerPos.setValue(movePos.x, movePos.y);
+        this.model.our.get(this.playerPos.y).get(this.playerPos.x).type = Define.PLAYER;
+        lookAround();
+
+        if(isBranchBlock()){
+            makeBranchBlock(this.playerPos.x,this.playerPos.y);
+            // Branch 우선 순위 계산 및 경로로 이동
+        }
+        if(isMana()){
+            // 스캔 우선 순위 계산
+            mana = 0.f;
+            if(Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)) == null)
+                makeBranchBlock(this.playerPos.x,this.playerPos.y); // 스캔 써도 BranchBlock으로 만들기.
+            // useScan()
         }
     }
 
+    // if use Scan : BranchBlock 생성
+    // useScan our Map에 수정 x 코드 수정 필요.
     public boolean useScan(Define.Pos pos){
-        if(!isMana())
-            return false;
-        mana = 0.0f;
-
         for(Define.Pos p : Define.sacnBoundary){
             Define.Pos look = new Define.Pos(pos.x, pos.y);
             look.x += p.x;

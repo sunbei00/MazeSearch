@@ -45,6 +45,12 @@ public class Define {
             this.x = x;
             this.y = y;
         }
+
+        public boolean isEquals(Define.Pos pos){
+            if(x != pos.x || y != pos.y)
+                return false;
+            return true;
+        }
     }
 
     final static Define.Pos[] boundary = new Define.Pos[]{
@@ -57,6 +63,12 @@ public class Define {
             new Define.Pos(-1,1),  // 좌하
             new Define.Pos(1,-1), // 우상
             new Define.Pos(1,1),  // 우하
+    };
+    final static Define.Pos[] moveBoundary = new Define.Pos[]{
+            new Define.Pos(0,-1), // 상
+            new Define.Pos(0,1),  // 하
+            new Define.Pos(-1,0), // 좌
+            new Define.Pos(1,0),  // 우
     };
     final static Define.Pos[] sacnBoundary = new Define.Pos[]{
             new Define.Pos(-2,-2),
@@ -97,7 +109,7 @@ public class Define {
         }
     }
 
-    public static int hashCode(int x,int y) {
+    public static int HashCode(int x,int y) {
         return x*10000 + y;
     }
 

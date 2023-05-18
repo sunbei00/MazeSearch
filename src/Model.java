@@ -77,11 +77,12 @@ public class Model {
 
             Game game = new Game(this);
 
-            game.useScan(new Define.Pos(10,10));
-            for(int i=0;i<100;i++){
+            //game.useScan(new Define.Pos(10,10));
+            for(int i=0;i < 12;i++){
                 game.Move();
-                game.useBreak(new Define.Pos(3,2));
+                //game.useBreak(new Define.Pos(3,2));
             }
+
         }catch (IOException e){
             e.printStackTrace();
             System.exit(1);
@@ -152,7 +153,6 @@ public class Model {
             System.exit(0);
         }
     }
-
     public int getRow(){
         return this.row;
     }
