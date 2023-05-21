@@ -144,4 +144,15 @@ public class Define {
     }
 
     public static HashMap<Integer, BranchBlock> branchBlockHashMap = new HashMap<Integer, BranchBlock>();
+
+    static class ScanBlcok{
+
+        public int type;
+        public Pos pos;
+
+        public ScanBlcok(int type,Pos pos){
+            this.type = type;
+            this.pos = pos;
+        }
+    }
 }

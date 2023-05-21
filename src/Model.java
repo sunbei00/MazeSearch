@@ -13,6 +13,7 @@ public class Model {
     private int col = -1;
     public ArrayList<ArrayList<Define.Block>> groundTruth = null;
     public ArrayList<ArrayList<Define.Block>> our = null;
+    public ArrayList<Define.ScanBlcok> scan = new ArrayList<>();
 
 
     public Model() {}
@@ -74,6 +75,7 @@ public class Model {
                 for(int j=0;j<col;j++)
                     this.our.get(i).add(new Define.Block(Define.UNKNOWN));
             }
+            scan.clear();
 
             Game game = new Game(this);
 

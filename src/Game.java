@@ -226,11 +226,10 @@ public class Game {
             if(Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)) == null)
                 makeBranchBlock(this.playerPos.x,this.playerPos.y); // 스캔 써도 BranchBlock으로 만들기.
             // useScan()
+            // 우선순위 탐색 및 경로 설정.
         }
     }
 
-    // if use Scan : BranchBlock 생성
-    // useScan our Map에 수정 x 코드 수정 필요.
     public boolean useScan(Define.Pos pos){
         for(Define.Pos p : Define.sacnBoundary){
             Define.Pos look = new Define.Pos(pos.x, pos.y);
@@ -240,14 +239,14 @@ public class Game {
             if(this.model.our.get(look.y).get(look.x).type != Define.UNKNOWN) // 이미 알고있으면 계산x
                 continue;
             if(this.model.groundTruth.get(look.y).get(look.x).type == Define.WALL) // 벽 표시
-                this.model.our.get(look.y).set(look.x, new Define.Block(Define.WALL));
+                this.model.scan.add(new Define.ScanBlcok(Define.WALL, look));
             if(this.model.groundTruth.get(look.y).get(look.x).type == Define.AIR) // 길 표시
-                this.model.our.get(look.y).set(look.x, new Define.Block(Define.AIR));
+                this.model.scan.add(new Define.ScanBlcok(Define.AIR, look));
 
             if(look.x == 0 || look.x == this.model.getCol() - 1 || look.y == 0 || look.y == this.model.getRow() -1)
                 if(!(look.x == 1 && look.y == 0))  // 출발점을 제외한 벽의 양 끝에 길이 있으면 목적지
                     if(this.model.groundTruth.get(look.y).get(look.x).type == Define.AIR)
-                        this.model.our.get(look.y).set(look.x, new Define.Block(Define.GOAL));
+                        this.model.scan.add(new Define.ScanBlcok(Define.GOAL, look));
         }
         return true;
     }
@@ -264,14 +263,14 @@ public class Game {
         if(this.model.groundTruth.get(pos.y).get(pos.x).type != Define.WALL) // 부시려는 것이 벽이 아닐 경우
             return false;
 
-        this.model.groundTruth.get(pos.y).set(pos.x, new Define.Block(Define.BREAK)); // GroundTruth에 벽을 부순 위치 표시
+        this.model.groundTruth.get(pos.y).get(pos.x).type = Define.BREAK; // GroundTruth에 벽을 부순 위치 표시
         for(Define.Pos p : Define.boundary) { // lookAround 재계산을 위해서 주변 AIR를 제외한 것들을 UNKNOWN으로 변경
             Define.Pos look = new Define.Pos(this.playerPos.x, this.playerPos.y);
             look.x += p.x;
             look.y += p.y;
             calcIndex(look);
             if(this.model.our.get(look.y).get(look.x).type != Define.AIR)
-                this.model.our.get(look.y).set(look.x, new Define.Block(Define.UNKNOWN));
+                this.model.our.get(look.y).get(look.x).type = Define.UNKNOWN;
         }
         lookAround();
         this.breakItem = false;
