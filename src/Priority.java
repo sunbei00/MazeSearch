@@ -1,4 +1,3 @@
-import javax.xml.stream.Location;
 import java.util.ArrayList;
 
 public class Priority {
@@ -11,7 +10,7 @@ public class Priority {
     }
 
     private void updatePriority(Define.orientation udlr, int priority, int distance, int x, int y) {
-        int maxPriority = -100000000;
+        int maxPriority = Integer.MIN_VALUE;
 
         if (udlr.exist == true && udlr.linkedBranch==null) {
             udlr.priority = -10 * priority - distance;
