@@ -15,6 +15,10 @@ public class Game {
     private static Define.BranchBlock prevBranchBlock = null; // Temp for move
     private static int accumulateDistance = 0;
 
+    public int getEnergy() {
+        return energy;
+    }
+
     public boolean isEnergy(){
         if(this.energy > 0)
             return true;

@@ -58,6 +58,8 @@ public class Model {
             for(int i=0;i<this.groundTruth.size();i++)
                 if(this.groundTruth.get(i).size() != col)
                     throw new IOException("File is Error(Column Error)");
+
+            fileReader.close();
         }catch (IOException e){
             e.printStackTrace();
             System.exit(0);
@@ -80,10 +82,28 @@ public class Model {
             Game game = new Game(this);
 
             //game.useScan(new Define.Pos(10,10));
-            for(int i=0;i < 12;i++){
+            for(int i=0;i < getRow()*getCol()*2;i++){
                 game.Move();
                 //game.useBreak(new Define.Pos(3,2));
+
+                /*  path 사진으로 출력
+                File Folder = new File("path");
+                if (!Folder.exists()) {
+                    try{
+                        Folder.mkdir(); //폴더 생성합니다.
+                        System.out.println("폴더가 생성되었습니다.");
+                    }
+                    catch(Exception e){
+                        e.getStackTrace();
+                    }
+                }
+                setWritePath("./path/Our" + i + ".bmp");
+                ImgWrite(Define.ImgOutput.Our);
+                */
             }
+
+            setWritePath("Result.txt");
+            resultWrite(game.getEnergy());
 
         }catch (IOException e){
             e.printStackTrace();
@@ -150,6 +170,7 @@ public class Model {
 
             ImageIO.write(img, "bmp", file);
 
+
         }catch (IOException e){
             e.printStackTrace();
             System.exit(0);
@@ -160,5 +181,26 @@ public class Model {
     }
     public int getCol(){
         return this.col;
+    }
+
+    public void resultWrite(int remainEnergy){
+        try{
+            if(this.writePath == null)
+                throw new IOException("Need to set variable 'wrtiePath'");
+            FileWriter fileWriter = new FileWriter(this.writePath);
+
+            int initialEnergy = getCol()*getRow()*2;
+
+            fileWriter.write("Initial Energy : " + initialEnergy + "\n");
+            fileWriter.write("Wasted Energy : " + (initialEnergy - remainEnergy) + "\n");
+            fileWriter.write("Remain Energy : " + remainEnergy + "\n");
+            fileWriter.write("Insert File Name : " + readPath + "\n");
+
+            fileWriter.flush();
+            fileWriter.close();
+        }catch (IOException e){
+            e.printStackTrace();
+            System.exit(0);
+        }
     }
 }
