@@ -101,11 +101,15 @@ public class Define {
     public static class orientation{
         boolean exist;
         int distance;
+        int priority;
         BranchBlock linkedBranch;
         public orientation(boolean exist, int distance, BranchBlock linkedBranch){
             this.exist = exist;
             this.distance = distance;
             this.linkedBranch = linkedBranch;
+            if(exist) {
+                this.priority = 0;
+            }
         }
     }
 
@@ -134,12 +138,20 @@ public class Define {
     }
 
     public static class DestInfo{
-        public BranchBlock branchBlock = null;
+        public BranchBlock branchBlock;
         public int distance;
 
         public DestInfo(BranchBlock branchBlock, int distance){
             this.branchBlock = branchBlock;
             this.distance = distance;
+        }
+    }
+
+    public static class Location{
+        int x, y;
+        public Location(int x, int y){
+            this.x = x;
+            this.y = y;
         }
     }
 
