@@ -89,7 +89,6 @@ public class Define {
     public static class orientation{
         boolean exist;
         int distance;
-
         int priority;
         BranchBlock linkedBranch;
         public orientation(boolean exist, int distance, BranchBlock linkedBranch){
