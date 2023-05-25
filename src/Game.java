@@ -184,13 +184,14 @@ public class Game {
         }
     }
 
-    void makeBranchBlock(int x,int y){
+    Define.BranchBlock makeBranchBlock(int x,int y){
         System.out.println("Make Branch Block");
         Define.BranchBlock newBranchBlock = new Define.BranchBlock(playerPos.x, playerPos.y);
         setNewBranchBlock(newBranchBlock); // make Graph
         Define.branchBlockHashMap.put(newBranchBlock.hashCode(),newBranchBlock);
         prevBranchBlock = newBranchBlock;
         accumulateDistance = 0;
+        return newBranchBlock;
     }
 
     public void Move(){
@@ -221,14 +222,25 @@ public class Game {
         lookAround();
 
         if(isBranchBlock()){
-            makeBranchBlock(this.playerPos.x,this.playerPos.y);
+            Define.BranchBlock branchBlock = null;
+            if(!Define.branchBlockHashMap.containsKey(Define.HashCode(this.playerPos.x,this.playerPos.y)))
+                branchBlock = makeBranchBlock(this.playerPos.x,this.playerPos.y);
             // Branch 우선 순위 계산 및 경로로 이동
+            if(branchBlock != null){
+                Route route = new Route(Define.branchBlockHashMap.get(Define.HashCode(1,0)), playerPos);
+                route.SetList();
+                ArrayList<Define.DestInfo> destInfos = route.Dijkstra(branchBlock);
+                //Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos);
+
+                //Define.Pos dest = priority.HighestPriorityBranch();
+
+            }
         }
         if(isMana()){
             // 스캔 우선 순위 계산
             mana = 0.f;
-            if(Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)) == null)
-                makeBranchBlock(this.playerPos.x,this.playerPos.y); // 스캔 써도 BranchBlock으로 만들기.
+            //if(Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)) == null)
+                //makeBranchBlock(this.playerPos.x,this.playerPos.y); // 스캔 써도 BranchBlock으로 만들기.
             // useScan()
             // 우선순위 탐색 및 경로 설정.
         }

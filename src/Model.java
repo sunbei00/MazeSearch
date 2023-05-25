@@ -82,7 +82,7 @@ public class Model {
             Game game = new Game(this);
 
             //game.useScan(new Define.Pos(10,10));
-            for(int i=0;i < getRow()*getCol()*2;i++){
+            for(int i=0;i < 15;i++){ // getRow()*getCol()*2
                 game.Move();
                 //game.useBreak(new Define.Pos(3,2));
 

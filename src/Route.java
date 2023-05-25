@@ -53,7 +53,7 @@ public class Route {
 
     //브랜치 블록 리스트 생성
     public void SetList() {
-        if(firstBranch != null & List.isEmpty()) {
+        if(firstBranch != null && List.isEmpty()) {
             List.add(firstBranch);
         }
         Iterator<Define.BranchBlock> listiterator = List.iterator();
@@ -63,15 +63,15 @@ public class Route {
                 if(!List.contains(next.up.linkedBranch))
                     List.add(next.up.linkedBranch);
             }
-            if(next.down.exist & next.down.linkedBranch != null) {
+            if(next.down.exist && next.down.linkedBranch != null) {
                 if(!List.contains(next.down.linkedBranch))
                     List.add(next.down.linkedBranch);
             }
-            if(next.left.exist & next.left.linkedBranch != null) {
+            if(next.left.exist && next.left.linkedBranch != null) {
                 if(!List.contains(next.left.linkedBranch))
                     List.add(next.left.linkedBranch);
             }
-            if(next.right.exist & next.right.linkedBranch != null) {
+            if(next.right.exist && next.right.linkedBranch != null) {
                 if(!List.contains(next.right.linkedBranch))
                     List.add(next.right.linkedBranch);
             }
@@ -84,7 +84,8 @@ public class Route {
 
     // 최소거리 계산
     // 현재 브랜치 기준으로 각 브랜치까지의 거리를 계산해 DestInfo 타입의 리스트로 저장
-    public ArrayList<Define.DestInfo> Dijkstra (Define.BranchBlock start, int size) {
+    public ArrayList<Define.DestInfo> Dijkstra (Define.BranchBlock start) {
+        int size = List.size();
         boolean[] check = new boolean[size];
         int[] dis = new int[size];
         this.routeTable = new ArrayList<ArrayList<Direction>>();
@@ -107,28 +108,28 @@ public class Route {
             check[List.indexOf(nowBranch)] = true;
 
             //각각의 4방향의 linked branch 여부 확인 후, 경로의 길이를 비교한 뒤 더 짧은 경로가 있다면 업데이트
-            if(nowBranch.up.linkedBranch != null & dis[List.indexOf(nowBranch.up.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.up.distance) {
+            if(nowBranch.up.linkedBranch != null && dis[List.indexOf(nowBranch.up.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.up.distance) {
                 dis[List.indexOf(nowBranch.up.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.up.distance;
                 now.directions.add(Direction.UP);
                 routeTable.set(List.indexOf(nowBranch.up.linkedBranch),now.directions);
 
                 pq.offer(new Define.DestInfo(nowBranch.up.linkedBranch, dis[List.indexOf(nowBranch.up.linkedBranch)]));
             }
-            if(nowBranch.down.linkedBranch != null & dis[List.indexOf(nowBranch.down.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.down.distance) {
+            if(nowBranch.down.linkedBranch != null && dis[List.indexOf(nowBranch.down.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.down.distance) {
                 dis[List.indexOf(nowBranch.down.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.down.distance;
                 now.directions.add(Direction.DOWN);
                 routeTable.set(List.indexOf(nowBranch.down.linkedBranch),now.directions);
 
                 pq.offer(new Define.DestInfo(nowBranch.down.linkedBranch, dis[List.indexOf(nowBranch.down.linkedBranch)]));
             }
-            if(nowBranch.left.linkedBranch != null & dis[List.indexOf(nowBranch.left.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.left.distance) {
+            if(nowBranch.left.linkedBranch != null && dis[List.indexOf(nowBranch.left.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.left.distance) {
                 dis[List.indexOf(nowBranch.left.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.left.distance;
                 now.directions.add(Direction.LEFT);
                 routeTable.set(List.indexOf(nowBranch.left.linkedBranch),now.directions);
 
                 pq.offer(new Define.DestInfo(nowBranch.left.linkedBranch, dis[List.indexOf(nowBranch.left.linkedBranch)]));
             }
-            if(nowBranch.right.linkedBranch != null & dis[List.indexOf(nowBranch.right.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.right.distance) {
+            if(nowBranch.right.linkedBranch != null && dis[List.indexOf(nowBranch.right.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.right.distance) {
                 dis[List.indexOf(nowBranch.right.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.right.distance;
                 now.directions.add(Direction.RIGHT);
                 routeTable.set(List.indexOf(nowBranch.right.linkedBranch),now.directions);
