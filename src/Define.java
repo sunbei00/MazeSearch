@@ -137,11 +137,18 @@ public class Define {
 
     }
 
-    public static class DestInfo{
-        public BranchBlock branchBlock;
+    public static class DestInfo {
+        public BranchBlock branchBlock = null;
         public int distance;
+        public ArrayList<Route.Direction> directions = null;
 
-        public DestInfo(BranchBlock branchBlock, int distance){
+        public DestInfo(BranchBlock branchBlock, int distance, ArrayList<Route.Direction> directions) {
+            this.branchBlock = branchBlock;
+            this.distance = distance;
+            this.directions = directions;
+        }
+
+        public DestInfo(BranchBlock branchBlock, int distance) {
             this.branchBlock = branchBlock;
             this.distance = distance;
         }
@@ -167,4 +174,19 @@ public class Define {
             this.pos = pos;
         }
     }
+
+    static class ScanPoint {
+        public int x;
+        public int y;
+        public boolean visited;
+
+        public double priority = 0;
+
+        public ScanPoint(int x, int y, boolean visited) {
+            this.x = x;
+            this.y = y;
+            this.visited = false;
+        }
+    }
+
 }
