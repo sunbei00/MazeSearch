@@ -262,9 +262,11 @@ public class Game {
                 ArrayList<Define.DestInfo> destInfos = route.Dijkstra(branchBlock);
                 // 어느 방향으로 이동했는지에 대해서도 저장을 해야한다,
 
-                //Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos);
+                Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos);
 
-                //Define.Pos dest = priority.HighestPriorityBranch();
+                Define.Pos dest = priority.HighestPriorityBranch();
+
+                System.out.print("test");
             }
         }
         if(isMana()){

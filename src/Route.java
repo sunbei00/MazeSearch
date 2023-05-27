@@ -78,6 +78,9 @@ public class Route {
         PriorityQueue<Define.DestInfo> pq = new PriorityQueue<>();
         pq.offer(new Define.DestInfo(start, 0));
 
+        for(int i = 0; i < List.size(); i++)
+            routeTable.add(new ArrayList<>());
+
         while(!pq.isEmpty()) {
             Define.DestInfo now = pq.poll();
             Define.BranchBlock nowBranch = now.branchBlock;

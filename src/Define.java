@@ -137,7 +137,7 @@ public class Define {
 
     }
 
-    public static class DestInfo {
+    public static class DestInfo implements Comparable<DestInfo> {
         public BranchBlock branchBlock = null;
         public int distance;
         public ArrayList<Route.Direction> directions = null;
@@ -151,6 +151,17 @@ public class Define {
         public DestInfo(BranchBlock branchBlock, int distance) {
             this.branchBlock = branchBlock;
             this.distance = distance;
+        }
+
+        @Override
+        public int compareTo(DestInfo o) {
+
+            if (this.distance > o.distance)
+                return 1;
+            else if (this.distance < o.distance)
+                return -1;
+            else
+                return 0;
         }
     }
 
