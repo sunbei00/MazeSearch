@@ -53,29 +53,9 @@ public class Route {
 
     //브랜치 블록 리스트 생성
     public void SetList() {
-        if(firstBranch != null && List.isEmpty()) {
-            List.add(firstBranch);
-        }
-        Iterator<Define.BranchBlock> listiterator = List.iterator();
-        while(listiterator.hasNext()) {
-            Define.BranchBlock next = listiterator.next();
-            if(next.up.exist & next.up.linkedBranch != null) {
-                if(!List.contains(next.up.linkedBranch))
-                    List.add(next.up.linkedBranch);
-            }
-            if(next.down.exist && next.down.linkedBranch != null) {
-                if(!List.contains(next.down.linkedBranch))
-                    List.add(next.down.linkedBranch);
-            }
-            if(next.left.exist && next.left.linkedBranch != null) {
-                if(!List.contains(next.left.linkedBranch))
-                    List.add(next.left.linkedBranch);
-            }
-            if(next.right.exist && next.right.linkedBranch != null) {
-                if(!List.contains(next.right.linkedBranch))
-                    List.add(next.right.linkedBranch);
-            }
-        }
+        List.clear();
+        for (Define.BranchBlock b: Define.branchBlockHashMap.values())
+            List.add(b);
     }
     /*
      * 다익스트라 알고리즘 핵심 키워드 : 방문여부, 거리

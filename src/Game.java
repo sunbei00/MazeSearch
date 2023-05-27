@@ -15,6 +15,8 @@ public class Game {
     private static Define.BranchBlock prevBranchBlock = null; // Temp for move
     private static int accumulateDistance = 0;
 
+    private Route.Direction prevBranchDirection;
+
     public int getEnergy() {
         return energy;
     }
@@ -55,7 +57,15 @@ public class Game {
         Define.branchBlockHashMap.clear();
         Define.branchBlockHashMap.put(Define.HashCode(1,0), new Define.BranchBlock(1,0));
         prevPos.setValue(1,0);
-        prevBranchBlock = Define.branchBlockHashMap.get(0);
+        Game.prevBranchBlock = Define.branchBlockHashMap.get(Define.HashCode(1,0));
+        if(model.our.get(1).get(1).type == Define.AIR){
+            prevBranchBlock.down.exist = true;
+            //  playerPos.x-prevPos.x    playerPos.y-prevPos.y
+            prevBranchDirection = Route.Direction.DOWN;
+
+        }else{
+            // Game Over
+        }
         accumulateDistance = 0;
     }
 
@@ -166,6 +176,26 @@ public class Game {
             branchBlock.up.exist = true;
             branchBlock.up.linkedBranch = prevBranchBlock;
         }
+        if(prevBranchDirection == Route.Direction.UP){
+            prevBranchBlock.up.distance = accumulateDistance;
+            prevBranchBlock.up.exist = true;
+            prevBranchBlock.up.linkedBranch = branchBlock;
+        }
+        if(prevBranchDirection == Route.Direction.DOWN){
+            prevBranchBlock.down.distance = accumulateDistance;
+            prevBranchBlock.down.exist = true;
+            prevBranchBlock.down.linkedBranch = branchBlock;
+        }
+        if(prevBranchDirection == Route.Direction.RIGHT){
+            prevBranchBlock.right.distance = accumulateDistance;
+            prevBranchBlock.right.exist = true;
+            prevBranchBlock.right.linkedBranch = branchBlock;
+        }
+        if(prevBranchDirection == Route.Direction.LEFT){
+            prevBranchBlock.left.distance = accumulateDistance;
+            prevBranchBlock.left.exist = true;
+            prevBranchBlock.left.linkedBranch = branchBlock;
+        }
         for (Define.Pos p : Define.moveBoundary) {
             look.setValue(this.playerPos.x, this.playerPos.y);
             look.x += p.x;
@@ -230,10 +260,11 @@ public class Game {
                 Route route = new Route(Define.branchBlockHashMap.get(Define.HashCode(1,0)), playerPos);
                 route.SetList();
                 ArrayList<Define.DestInfo> destInfos = route.Dijkstra(branchBlock);
+                // 어느 방향으로 이동했는지에 대해서도 저장을 해야한다,
+
                 //Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos);
 
                 //Define.Pos dest = priority.HighestPriorityBranch();
-
             }
         }
         if(isMana()){
