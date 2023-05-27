@@ -10,6 +10,11 @@ public class Pos {
         this.x = 1;
         this.y = 0;
     }
+
+    public int hashCode(){
+        return Util.HashCode(x,y);
+    }
+
     public void setValue(int x, int y){
         this.x = x;
         this.y = y;

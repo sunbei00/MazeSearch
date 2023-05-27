@@ -83,12 +83,13 @@ public class Model {
 
             Game game = new Game(this);
 
+            /*
             //game.useScan(new Define.Pos(10,10));
             for(int i=0;i < 15;i++){ // getRow()*getCol()*2
                 game.Move();
                 //game.useBreak(new Define.Pos(3,2));
 
-                /*  path 사진으로 출력
+                 path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
                     try{
@@ -101,7 +102,17 @@ public class Model {
                 }
                 setWritePath("./path/Our" + i + ".bmp");
                 ImgWrite(Define.ImgOutput.Our);
-                */
+
+            }
+            */
+            our = groundTruth;
+            BranchBlockGraph bbg = new BranchBlockGraph(this);
+            bbg.clear();
+            bbg.checkBranchBlock();
+            BranchBlock firstBlock = bbg.buildGraph();
+
+            for(BranchBlock b : bbg.branchBlockHashMap.values()){
+                groundTruth.get(b.y).get(b.x).type = Define.BRANCH_BLOCK;
             }
 
             setWritePath("Result.txt");
@@ -169,15 +180,13 @@ public class Model {
                     count++;
                 }
             }
-
             ImageIO.write(img, "bmp", file);
-
-
         }catch (IOException e){
             e.printStackTrace();
             System.exit(0);
         }
     }
+
     public int getRow(){
         return this.row;
     }

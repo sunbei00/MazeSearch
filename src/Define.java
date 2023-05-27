@@ -66,10 +66,9 @@ public class Define {
         UP,
         DOWN,
         LEFT,
-        RIGHT
+        RIGHT,
+        UNKNOWN
     }
-
-
 
 
 }

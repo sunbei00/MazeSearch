@@ -12,6 +12,6 @@ public class BranchBlock {
     }
     @Override
     public int hashCode() {
-        return x*10000 + y;
+        return Util.HashCode(x,y);
     }
 }
