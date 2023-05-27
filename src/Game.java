@@ -6,15 +6,15 @@ public class Game {
     private int energy;
     private float mana;
     private boolean breakItem;
-    private Define.Pos breakPos;
+    private Pos breakPos;
     private Model model;
-    private Define.Pos playerPos = new Define.Pos();
-    private static Define.Pos look = new Define.Pos(); // optimize for memory (Temp)
-    private static Define.Pos prevPos = new Define.Pos(); // Temp for move
-    private static Define.Pos movePos = new Define.Pos(); // Temp for moveAround
-    private static Define.BranchBlock prevBranchBlock = null; // Temp for move
+    private Pos playerPos = new Pos();
+    private static Pos look = new Pos(); // optimize for memory (Temp)
+    private static Pos prevPos = new Pos(); // Temp for move
+    private static Pos movePos = new Pos(); // Temp for moveAround
+    private static BranchBlock prevBranchBlock = null; // Temp for move
     private static int accumulateDistance = 0;
-    private Route.Direction prevBranchDirection;
+    private Define.Direction prevBranchDirection;
 
     public int getEnergy() {
         return energy;
@@ -44,7 +44,7 @@ public class Game {
             this.mana = 3.0f;
     }
     public boolean isMana(){
-        if(this.mana == 3.0f)
+        if(Math.abs(this.mana - 3.0f) <= 10e-4) // float error
             return true;
         return false;
     }
@@ -61,14 +61,14 @@ public class Game {
         this.playerPos.setValue(1,0);
         this.model.our.get(this.playerPos.y).get(this.playerPos.x).type = Define.PLAYER;
         lookAround();
-        Define.branchBlockHashMap.clear();
-        Define.branchBlockHashMap.put(Define.HashCode(1,0), new Define.BranchBlock(1,0));
+        model.branchBlockHashMap.clear();
+        model.branchBlockHashMap.put(Util.HashCode(1,0), new BranchBlock(1,0));
         prevPos.setValue(1,0);
-        Game.prevBranchBlock = Define.branchBlockHashMap.get(Define.HashCode(1,0));
+        Game.prevBranchBlock = model.branchBlockHashMap.get(Util.HashCode(1,0));
         if(model.our.get(1).get(1).type == Define.AIR){
             prevBranchBlock.down.exist = true;
             //  playerPos.x-prevPos.x    playerPos.y-prevPos.y
-            prevBranchDirection = Route.Direction.DOWN;
+            prevBranchDirection = Define.Direction.DOWN;
 
         }else{
             // Game Over
@@ -76,23 +76,12 @@ public class Game {
         accumulateDistance = 0;
     }
 
-    private void calcIndex(Define.Pos pos){ // index error 방지
-        if(pos.x < 0)
-            pos.x = 0;
-        if(pos.x >= this.model.getCol())
-            pos.x = this.model.getCol() - 1;
-        if(pos.y < 0)
-            pos.y = 0;
-        if(pos.y >= this.model.getRow())
-            pos.y = this.model.getRow() - 1;
-    }
-
     private void lookAround(){
-        for(Define.Pos p : Define.boundary){
+        for(Pos p : Define.boundary){
             look.setValue(this.playerPos.x, this.playerPos.y);
             look.x += p.x;
             look.y += p.y;
-            calcIndex(look);
+            Util.calcIndex(look,model);
             if(this.model.our.get(look.y).get(look.x).type != Define.UNKNOWN) // 이미 알고있으면 계산x
                 continue;
             if(this.model.groundTruth.get(look.y).get(look.x).type == Define.WALL) // 벽 표시
@@ -102,7 +91,6 @@ public class Game {
             }
         }
     }
-
     private boolean isFinish(){
         if(playerPos.x == 1 && playerPos.y == 0)
             return false;
@@ -111,7 +99,6 @@ public class Game {
                 return true;
         return false;
     }
-
     private boolean isBranchBlock(){
          /*
             경우의 수 ( n := 길의 수 )
@@ -120,12 +107,12 @@ public class Game {
             iii) n = 1   : 막 다른 골목                   -> true 반환
         */
         int i = 0;
-        for (Define.Pos p : Define.moveBoundary) {
+        for (Pos p : Define.moveBoundary) {
             look.setValue(this.playerPos.x, this.playerPos.y);
             look.x += p.x;
             look.y += p.y;
 
-            calcIndex(look);
+            Util.calcIndex(look,model);
             if (this.model.our.get(look.y).get(look.x).type == Define.AIR)
                 i++;
         }
@@ -137,15 +124,14 @@ public class Game {
                 return true;
         }
     }
-
     private void moveAround() {
         // Branch Block이 아니라는 가정이 필수!! 잊지말기!!
         movePos.setValue(playerPos.x, playerPos.y);
-        for (Define.Pos p : Define.moveBoundary) {
+        for (Pos p : Define.moveBoundary) {
             look.setValue(this.playerPos.x, this.playerPos.y);
             look.x += p.x;
             look.y += p.y;
-            calcIndex(look);
+            Util.calcIndex(look,model);
             if (this.model.our.get(look.y).get(look.x).type == Define.AIR) {
                 if (look.isEquals(prevPos)) // 이전에 이동한 위치일 시
                     continue;
@@ -158,29 +144,28 @@ public class Game {
         this.playerPos.setValue(movePos.x, movePos.y);
         this.model.our.get(this.playerPos.y).get(this.playerPos.x).type = Define.PLAYER;
     }
-    private void moveDirection(Route.Direction direction) {
+    private void moveDirection(Define.Direction direction) {
         // direction 방향의 Block이 아니라는 가정이 필수!! 잊지말기!!
         movePos.setValue(playerPos.x, playerPos.y);
         look.setValue(this.playerPos.x, this.playerPos.y);
-        if(direction == Route.Direction.UP)
+        if(direction == Define.Direction.UP)
             look.y += -1;
-        if(direction == Route.Direction.DOWN)
+        if(direction == Define.Direction.DOWN)
             look.y += 1;
-        if(direction == Route.Direction.LEFT)
+        if(direction == Define.Direction.LEFT)
             look.x += -1;
-        if(direction == Route.Direction.RIGHT)
+        if(direction == Define.Direction.RIGHT)
             look.x += 1;
-        calcIndex(look);
+        Util.calcIndex(look,model);
         if (this.model.our.get(look.y).get(look.x).type == Define.AIR)
-            movePos.setValue(look.x, look.y); // 에러 있을 수도??
+            movePos.setValue(look.x, look.y); // 에러 있을 수도??, 없을 수도?? 머리 쓰기 싫어ㅓㅓㅓ
 
         this.prevPos.setValue(this.playerPos.x,this.playerPos.y);
         this.model.our.get(this.prevPos.y).get(this.prevPos.x).type = Define.AIR;
         this.playerPos.setValue(movePos.x, movePos.y);
         this.model.our.get(this.playerPos.y).get(this.playerPos.x).type = Define.PLAYER;
     }
-
-    private void setNewBranchBlock(Define.BranchBlock branchBlock){
+    private void setNewBranchBlock(BranchBlock branchBlock){
         int x_sub = playerPos.x-prevPos.x;
         int y_sub = playerPos.y-prevPos.y;
 
@@ -208,31 +193,31 @@ public class Game {
             branchBlock.up.exist = true;
             branchBlock.up.linkedBranch = prevBranchBlock;
         }
-        if(prevBranchDirection == Route.Direction.UP){
+        if(prevBranchDirection == Define.Direction.UP){
             prevBranchBlock.up.distance = accumulateDistance;
             prevBranchBlock.up.exist = true;
             prevBranchBlock.up.linkedBranch = branchBlock;
         }
-        if(prevBranchDirection == Route.Direction.DOWN){
+        if(prevBranchDirection == Define.Direction.DOWN){
             prevBranchBlock.down.distance = accumulateDistance;
             prevBranchBlock.down.exist = true;
             prevBranchBlock.down.linkedBranch = branchBlock;
         }
-        if(prevBranchDirection == Route.Direction.RIGHT){
+        if(prevBranchDirection == Define.Direction.RIGHT){
             prevBranchBlock.right.distance = accumulateDistance;
             prevBranchBlock.right.exist = true;
             prevBranchBlock.right.linkedBranch = branchBlock;
         }
-        if(prevBranchDirection == Route.Direction.LEFT){
+        if(prevBranchDirection == Define.Direction.LEFT){
             prevBranchBlock.left.distance = accumulateDistance;
             prevBranchBlock.left.exist = true;
             prevBranchBlock.left.linkedBranch = branchBlock;
         }
-        for (Define.Pos p : Define.moveBoundary) {
+        for (Pos p : Define.moveBoundary) {
             look.setValue(this.playerPos.x, this.playerPos.y);
             look.x += p.x;
             look.y += p.y;
-            calcIndex(look);
+            Util.calcIndex(look,model);
             if (this.model.our.get(look.y).get(look.x).type == Define.AIR) {
                 if(p.x == 1) // right
                     branchBlock.right.exist = true;
@@ -245,17 +230,88 @@ public class Game {
             }
         }
     }
-
-    Define.BranchBlock makeBranchBlock(int x,int y){
+    BranchBlock makeBranchBlock(int x,int y){
         System.out.println("Make Branch Block");
-        Define.BranchBlock newBranchBlock = new Define.BranchBlock(playerPos.x, playerPos.y);
+        BranchBlock newBranchBlock = new BranchBlock(playerPos.x, playerPos.y);
         setNewBranchBlock(newBranchBlock); // make Graph
-        Define.branchBlockHashMap.put(newBranchBlock.hashCode(),newBranchBlock);
+        model.branchBlockHashMap.put(newBranchBlock.hashCode(),newBranchBlock);
         prevBranchBlock = newBranchBlock;
         accumulateDistance = 0;
         return newBranchBlock;
     }
 
+    private void calculatePriorityAndMove(){
+        BranchBlock branchBlock = null;
+        if(!model.branchBlockHashMap.containsKey(Util.HashCode(this.playerPos.x,this.playerPos.y)))
+            branchBlock = makeBranchBlock(this.playerPos.x,this.playerPos.y);
+        else
+            branchBlock = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y));
+
+        // Branch 우선 순위 계산 및 경로로 이동
+        Route route = new Route(model.branchBlockHashMap.get(Util.HashCode(1,0)), playerPos, model);
+        route.SetList();
+        ArrayList<DestInfo> destInfos = route.Dijkstra(branchBlock);
+        // 어느 방향으로 이동했는지에 대해서도 저장을 해야한다,
+
+        Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos);
+        Pos dest = priority.HighestPriorityBranch();
+
+        if(priority.maxPriority == Integer.MIN_VALUE){
+            // Game Over
+            System.out.println("이동할 수 있는 맵이 미존재");
+            System.exit(0);
+        }
+
+        for (Define.Direction direction : priority.destResult.directions) {
+            int distance = 0;
+            if(direction == Define.Direction.UP)
+                distance = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).up.distance - 1;
+            if(direction == Define.Direction.DOWN)
+                distance = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).down.distance - 1;
+            if(direction == Define.Direction.LEFT)
+                distance = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).left.distance - 1;
+            if(direction == Define.Direction.RIGHT)
+                distance = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).right.distance - 1;
+
+            checkIsEndEnergy();
+            decreaseEnergy();
+            increaseMana();
+            moveDirection(direction);
+            for(int i=0; i < distance; i++){
+                checkIsEndEnergy();
+                decreaseEnergy();
+                increaseMana();
+                moveAround();
+            }
+        }
+
+        checkIsEndEnergy();
+        int x_sub = playerPos.x-dest.x;
+        int y_sub = playerPos.y-dest.y;
+        decreaseEnergy();
+        increaseMana();
+        // left
+        prevBranchBlock = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y));
+        if(x_sub == 1){
+            moveDirection(Define.Direction.LEFT);
+            prevBranchDirection = Define.Direction.LEFT;
+        }
+        // right
+        if(x_sub == -1){
+            moveDirection(Define.Direction.RIGHT);
+            prevBranchDirection = Define.Direction.RIGHT;
+        }
+        // down
+        if(y_sub == -1){
+            moveDirection(Define.Direction.DOWN);
+            prevBranchDirection = Define.Direction.DOWN;
+        }
+        // up
+        if(y_sub == 1){
+            moveDirection(Define.Direction.UP);
+            prevBranchDirection = Define.Direction.UP;
+        }
+    }
     public void Move(){
         // GAME OVER : 우선순위 계산 할 Branch가 미존재 할 시 (우선순위에서 계산해야 할 듯)
         if(isFinish()){
@@ -270,100 +326,45 @@ public class Game {
         accumulateDistance++;
 
         moveAround(); // Branch Block이 아니라는 가정 필수
-        lookAround();
 
-        if(isBranchBlock()){
-            Define.BranchBlock branchBlock = null;
-            if(!Define.branchBlockHashMap.containsKey(Define.HashCode(this.playerPos.x,this.playerPos.y))){
-                branchBlock = makeBranchBlock(this.playerPos.x,this.playerPos.y);
-                // Branch 우선 순위 계산 및 경로로 이동
-                Route route = new Route(Define.branchBlockHashMap.get(Define.HashCode(1,0)), playerPos);
-                route.SetList();
-                ArrayList<Define.DestInfo> destInfos = route.Dijkstra(branchBlock);
-                // 어느 방향으로 이동했는지에 대해서도 저장을 해야한다,
+        if(isBranchBlock())
+            calculatePriorityAndMove();
 
-                Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos);
-                Define.Pos dest = priority.HighestPriorityBranch();
-
-                if(priority.maxPriority == Integer.MIN_VALUE){
-                    // Game Over
-                    System.out.println("이동할 수 있는 맵이 미존재");
-                    System.exit(0);
-                }
-
-                for (Route.Direction direction : priority.destResult.directions) {
-                    int distance = 0;
-                    if(direction == Route.Direction.UP)
-                        distance = Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)).up.distance - 1;
-                    if(direction == Route.Direction.DOWN)
-                        distance = Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)).down.distance - 1;
-                    if(direction == Route.Direction.LEFT)
-                        distance = Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)).left.distance - 1;
-                    if(direction == Route.Direction.RIGHT)
-                        distance = Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)).right.distance - 1;
-
-                    checkIsEndEnergy();
-                    decreaseEnergy();
-                    increaseMana();
-                    moveDirection(direction);
-                    for(int i=0; i < distance; i++){
-                        checkIsEndEnergy();
-                        decreaseEnergy();
-                        increaseMana();
-                        moveAround();
-                    }
-                }
-
-                checkIsEndEnergy();
-                int x_sub = playerPos.x-dest.x;
-                int y_sub = playerPos.y-dest.y;
-                decreaseEnergy();
-                increaseMana();
-                // left
-                if(x_sub == 1)
-                    moveDirection(Route.Direction.LEFT);
-                // right
-                if(x_sub == -1)
-                    moveDirection(Route.Direction.RIGHT);
-                // down
-                if(y_sub == -1)
-                    moveDirection(Route.Direction.DOWN);
-                // up
-                if(y_sub == 1)
-                    moveDirection(Route.Direction.UP);
-            }
-        }
+        /*
         if(isMana()){
             // 스캔 우선 순위 계산
             mana = 0.f;
-            //if(Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)) == null)
-                //makeBranchBlock(this.playerPos.x,this.playerPos.y); // 스캔 써도 BranchBlock으로 만들기.
-            // useScan()
-            // 우선순위 탐색 및 경로 설정.
+            Priority.ScanPriority scanPriority = new Priority.ScanPriority(model,playerPos,model.our);
+            Define.ScanPoint scanPoint = scanPriority.HighestPriorityScan();
+            look.setValue(scanPoint.x,scanPoint.y);
+            useScan(look);
+            calculatePriorityAndMove();
         }
+        */
+        lookAround();
     }
 
-    public boolean useScan(Define.Pos pos){
-        for(Define.Pos p : Define.sacnBoundary){
-            Define.Pos look = new Define.Pos(pos.x, pos.y);
+    public boolean useScan(Pos pos){
+        for(Pos p : Define.sacnBoundary){
+            Pos look = new Pos(pos.x, pos.y);
             look.x += p.x;
             look.y += p.y;
-            calcIndex(look);
+            Util.calcIndex(look,model);
             if(this.model.our.get(look.y).get(look.x).type != Define.UNKNOWN) // 이미 알고있으면 계산x
                 continue;
             if(this.model.groundTruth.get(look.y).get(look.x).type == Define.WALL) // 벽 표시
-                this.model.scan.add(new Define.ScanBlcok(Define.WALL, look));
+                this.model.scan.add(new ScanBlock(Define.WALL, look));
             if(this.model.groundTruth.get(look.y).get(look.x).type == Define.AIR) // 길 표시
-                this.model.scan.add(new Define.ScanBlcok(Define.AIR, look));
+                this.model.scan.add(new ScanBlock(Define.AIR, look));
 
             if(look.x == 0 || look.x == this.model.getCol() - 1 || look.y == 0 || look.y == this.model.getRow() -1)
                 if(!(look.x == 1 && look.y == 0))  // 출발점을 제외한 벽의 양 끝에 길이 있으면 목적지
                     if(this.model.groundTruth.get(look.y).get(look.x).type == Define.AIR)
-                        this.model.scan.add(new Define.ScanBlcok(Define.GOAL, look));
+                        this.model.scan.add(new ScanBlock(Define.GOAL, look));
         }
         return true;
     }
-    public boolean useBreak(Define.Pos pos){
+    public boolean useBreak(Pos pos){
         if(!isBreakItem())
             return false;
         int magnitude = Math.abs(this.playerPos.x - pos.x) + Math.abs(this.playerPos.y - pos.y);
@@ -377,11 +378,11 @@ public class Game {
             return false;
 
         this.model.groundTruth.get(pos.y).get(pos.x).type = Define.BREAK; // GroundTruth에 벽을 부순 위치 표시
-        for(Define.Pos p : Define.boundary) { // lookAround 재계산을 위해서 주변 AIR를 제외한 것들을 UNKNOWN으로 변경
-            Define.Pos look = new Define.Pos(this.playerPos.x, this.playerPos.y);
+        for(Pos p : Define.boundary) { // lookAround 재계산을 위해서 주변 AIR를 제외한 것들을 UNKNOWN으로 변경
+            Pos look = new Pos(this.playerPos.x, this.playerPos.y);
             look.x += p.x;
             look.y += p.y;
-            calcIndex(look);
+            Util.calcIndex(look,model);
             if(this.model.our.get(look.y).get(look.x).type != Define.AIR)
                 this.model.our.get(look.y).get(look.x).type = Define.UNKNOWN;
         }

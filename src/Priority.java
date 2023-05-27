@@ -6,49 +6,47 @@ public class Priority {
 
     public static class BranchPriority {
         public Model model;
-        public Define.Pos location = new Define.Pos();
-        public ArrayList<Define.DestInfo> destInfos;
-        public Define.orientation going = new Define.orientation(false,-1, null);
+        public Pos location = new Pos();
+        public ArrayList<DestInfo> destInfos;
+        public DestInfo destResult;
         public int maxPriority; //minValue, 게임 end
-        public Define.DestInfo destResult = null;
 
-        public BranchPriority(Model model, ArrayList<Define.DestInfo> destInfos) {
+        public BranchPriority(Model model, ArrayList<DestInfo> destInfos) {
             this.model = model;
             this.destInfos = destInfos;
         }
 
-        private void updatePriority(Define.orientation udlr, int priority, int distance, int x, int y, Define.DestInfo destInfo) {
+        private void updatePriority(BranchBlock branchBlock, Orientation udlr, int priority, int distance, int x, int y, DestInfo destInfo) {
             if (udlr.exist == true && udlr.linkedBranch == null) {
                 udlr.priority = -10 * priority - distance;
                 if (udlr.priority > maxPriority) {
                     maxPriority = udlr.priority;
                     destResult = destInfo;
-                    going = udlr;
                     location.x = x;
                     location.y = y;
                 }
             }
         }
 
-        public Define.Pos HighestPriorityBranch() {
+        public Pos HighestPriorityBranch() {
             maxPriority = Integer.MIN_VALUE;
 
             int row = model.getRow();
             int col = model.getCol();
 
-            for (Define.DestInfo dest : destInfos) {
+            for (DestInfo dest : destInfos) {
                 int destDistance = dest.distance;
 
-                Define.BranchBlock branchBlock = dest.branchBlock;
+                BranchBlock branchBlock = dest.branchBlock;
                 int x = Math.min(branchBlock.x, col - branchBlock.x);
                 int y = Math.min(branchBlock.y, row - branchBlock.y);
 
                 //Math.min : 벽까지의 최소거리
                 //destDistance : 현재 위치에서 브랜치까지의 최소거리
-                updatePriority(branchBlock.up, Math.min(x, y - 1), destDistance, x, y - 1,dest);
-                updatePriority(branchBlock.down, Math.min(x, y + 1), destDistance, x, y + 1,dest);
-                updatePriority(branchBlock.right, Math.min(x + 1, y), destDistance, x + 1, y,dest);
-                updatePriority(branchBlock.left, Math.min(x - 1, y), destDistance, x - 1, y,dest);
+                updatePriority(branchBlock, branchBlock.up, Math.min(x, y - 1), destDistance, x, y - 1,dest);
+                updatePriority(branchBlock, branchBlock.down, Math.min(x, y + 1), destDistance, x, y + 1,dest);
+                updatePriority(branchBlock, branchBlock.right, Math.min(x + 1, y), destDistance, x + 1, y,dest);
+                updatePriority(branchBlock, branchBlock.left, Math.min(x - 1, y), destDistance, x - 1, y,dest);
             }
 
             return location;
@@ -58,20 +56,20 @@ public class Priority {
 
     public static class ScanPriority {
         public Model model;
-        HashSet<Define.ScanPoint> scanCenter = new HashSet<>();
+        HashSet<ScanPoint> scanCenter = new HashSet<>();
 
         //쥐가 현재 알고있는 Map 정보
-        public ArrayList<ArrayList<Define.Block>> our;
+        public ArrayList<ArrayList<Block>> our;
 
         //쥐의 현재 위치, 대칭점 계산
-        public Define.Pos location;
+        public Pos location;
 
         int row = model.getRow();
         int col = model.getCol();
 
 
         //현재 쥐의 위치와, 알고있는 Map 정보
-        public ScanPriority(Model model, Define.Pos location, ArrayList<ArrayList<Define.Block>> our){
+        public ScanPriority(Model model, Pos location, ArrayList<ArrayList<Block>> our){
             this.model = model;
             this.location = location;
             this.our = our;
@@ -79,10 +77,10 @@ public class Priority {
 
 
         //이미 스캔한 범위일 경우, unknown 비율 체크
-        public int checkUnknown(Define.ScanPoint point) {
+        public int checkUnknown(ScanPoint point) {
             int unknown_count = 0;
-            for (Define.Pos p : Define.sacnBoundary) {
-                Define.Pos look = new Define.Pos(point.x, point.y); //스캔할 지역의 중심좌표, new 생성
+            for (Pos p : Define.sacnBoundary) {
+                Pos look = new Pos(point.x, point.y); //스캔할 지역의 중심좌표, new 생성
 
                 //스캔 범위
                 look.x += p.x;
@@ -98,11 +96,11 @@ public class Priority {
         }
 
         //우선순위 스캔 구역 선정
-        public Define.ScanPoint HighestPriorityScan() {
+        public ScanPoint HighestPriorityScan() {
             //각 스캔그리드 중심 좌표, 5n*5n 구역만 고려 //최외각만 따로 그리드 생성하는 방식으로 바꾸기!
             for(int i=2;i<row;i+=5){
                 for(int j=2;j<col;j+=5){
-                    Define.ScanPoint center = new Define.ScanPoint(i,j, false);
+                    ScanPoint center = new ScanPoint(i,j, false);
                     scanCenter.add(center);
                 }
             }
@@ -123,16 +121,16 @@ public class Priority {
 
             //왼쪽 행 외곽
             for(int i=2;i<row;i+=5){
-                Define.ScanPoint leftcenter = new Define.ScanPoint(2, i, false);
+                ScanPoint leftcenter = new ScanPoint(2, i, false);
                 scanCenter.add(leftcenter);
-                Define.ScanPoint rightcenter = new Define.ScanPoint(right, i, false);
+                ScanPoint rightcenter = new ScanPoint(right, i, false);
                 scanCenter.add(rightcenter);
             }
 
             for(int i=2;i<col;i+=5){
-                Define.ScanPoint topcenter = new Define.ScanPoint(i, 2, false);
+                ScanPoint topcenter = new ScanPoint(i, 2, false);
                 scanCenter.add(topcenter);
-                Define.ScanPoint bottomcenter = new Define.ScanPoint(i, bottom, false);
+                ScanPoint bottomcenter = new ScanPoint(i, bottom, false);
                 scanCenter.add(bottomcenter);
             }
 
@@ -143,9 +141,9 @@ public class Priority {
             int symY = col - location.y;
 
             double maxPriority = Double.MIN_VALUE;
-            Define.ScanPoint scanPoint = new Define.ScanPoint(1, 1, false);
+            ScanPoint scanPoint = new ScanPoint(1, 1, false);
 
-            for(Define.ScanPoint point : scanCenter){
+            for(ScanPoint point : scanCenter){
                 //미스캔 영역
                 if(point.visited==false) {
                     int xDiff = point.x - symX;

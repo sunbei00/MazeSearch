@@ -2,6 +2,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.io.*;
+import java.util.HashMap;
 import java.util.Iterator;
 
 
@@ -11,9 +12,10 @@ public class Model {
     private String writePath = null;
     private int row = -1;
     private int col = -1;
-    public ArrayList<ArrayList<Define.Block>> groundTruth = null;
-    public ArrayList<ArrayList<Define.Block>> our = null;
-    public ArrayList<Define.ScanBlcok> scan = new ArrayList<>();
+    public ArrayList<ArrayList<Block>> groundTruth = null;
+    public ArrayList<ArrayList<Block>> our = null;
+    public ArrayList<ScanBlock> scan = new ArrayList<>();
+    public HashMap<Integer, BranchBlock> branchBlockHashMap = new HashMap<Integer, BranchBlock>();
 
 
     public Model() {}
@@ -40,15 +42,15 @@ public class Model {
 
             int count=0;
             int ch;
-            this.groundTruth = new ArrayList<ArrayList<Define.Block>>();
-            this.groundTruth.add(count,new ArrayList<Define.Block>()); // 최소 1개의 row가 있다고 가정.
+            this.groundTruth = new ArrayList<ArrayList<Block>>();
+            this.groundTruth.add(count,new ArrayList<Block>()); // 최소 1개의 row가 있다고 가정.
             while((ch = fileReader.read()) != -1){
                 if(ch == '\n'){
                     count++;
-                    this.groundTruth.add(count,new ArrayList<Define.Block>());
+                    this.groundTruth.add(count,new ArrayList<Block>());
                 }
                 else if(ch == Define.AIR || ch == Define.WALL)
-                    this.groundTruth.get(count).add(new Define.Block(ch));
+                    this.groundTruth.get(count).add(new Block(ch));
                 else if( ch > 32  && ch != 127) // 제어 문자, 빈 문자, 0,1 이외의 값이 들어오면 오류 처리
                     throw new IOException("File is Error(Error Character) : " +  (char)ch);
             }
@@ -70,12 +72,12 @@ public class Model {
         try{
             if(readPath == null)
                 throw new IOException("Need to run 'fileRead'");
-            this.our = new ArrayList<ArrayList<Define.Block>>();
+            this.our = new ArrayList<ArrayList<Block>>();
 
             for(int i=0;i<row;i++){
-                this.our.add(i,new ArrayList<Define.Block>());
+                this.our.add(i,new ArrayList<Block>());
                 for(int j=0;j<col;j++)
-                    this.our.get(i).add(new Define.Block(Define.UNKNOWN));
+                    this.our.get(i).add(new Block(Define.UNKNOWN));
             }
             scan.clear();
 
@@ -124,9 +126,9 @@ public class Model {
             File file = new File(writePath);
 
             int count=0;
-            Define.Block element;
-            Iterator<ArrayList<Define.Block>> rowIT = null;
-            Iterator<Define.Block> colIT = null;
+            Block element;
+            Iterator<ArrayList<Block>> rowIT = null;
+            Iterator<Block> colIT = null;
 
             switch (imgOutput){
                 case GroundTruth:
