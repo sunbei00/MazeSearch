@@ -14,17 +14,24 @@ public class Game {
     private static Define.Pos movePos = new Define.Pos(); // Temp for moveAround
     private static Define.BranchBlock prevBranchBlock = null; // Temp for move
     private static int accumulateDistance = 0;
-
     private Route.Direction prevBranchDirection;
 
     public int getEnergy() {
         return energy;
     }
-
     public boolean isEnergy(){
         if(this.energy > 0)
             return true;
         return false;
+    }
+    private void checkIsEndEnergy(){
+        if(!isEnergy()){
+            // GAME OVER
+            // FILE WRITE
+            // EXIT
+            System.out.println("!isEnergy");
+            System.exit(0);
+        }
     }
     private void decreaseEnergy(){
         if(this.energy <= 0)
@@ -143,9 +150,34 @@ public class Game {
                 if (look.isEquals(prevPos)) // 이전에 이동한 위치일 시
                     continue;
                 movePos.setValue(look.x, look.y);
-                return;
+                break;
             }
         }
+        this.prevPos.setValue(this.playerPos.x,this.playerPos.y);
+        this.model.our.get(this.prevPos.y).get(this.prevPos.x).type = Define.AIR;
+        this.playerPos.setValue(movePos.x, movePos.y);
+        this.model.our.get(this.playerPos.y).get(this.playerPos.x).type = Define.PLAYER;
+    }
+    private void moveDirection(Route.Direction direction) {
+        // direction 방향의 Block이 아니라는 가정이 필수!! 잊지말기!!
+        movePos.setValue(playerPos.x, playerPos.y);
+        look.setValue(this.playerPos.x, this.playerPos.y);
+        if(direction == Route.Direction.UP)
+            look.y += -1;
+        if(direction == Route.Direction.DOWN)
+            look.y += 1;
+        if(direction == Route.Direction.LEFT)
+            look.x += -1;
+        if(direction == Route.Direction.RIGHT)
+            look.x += 1;
+        calcIndex(look);
+        if (this.model.our.get(look.y).get(look.x).type == Define.AIR)
+            movePos.setValue(look.x, look.y); // 에러 있을 수도??
+
+        this.prevPos.setValue(this.playerPos.x,this.playerPos.y);
+        this.model.our.get(this.prevPos.y).get(this.prevPos.x).type = Define.AIR;
+        this.playerPos.setValue(movePos.x, movePos.y);
+        this.model.our.get(this.playerPos.y).get(this.playerPos.x).type = Define.PLAYER;
     }
 
     private void setNewBranchBlock(Define.BranchBlock branchBlock){
@@ -225,13 +257,6 @@ public class Game {
     }
 
     public void Move(){
-        if(!isEnergy()){
-            // GAME OVER
-            // FILE WRITE
-            // EXIT
-            System.out.println("!isEnergy");
-            System.exit(0);
-        }
         // GAME OVER : 우선순위 계산 할 Branch가 미존재 할 시 (우선순위에서 계산해야 할 듯)
         if(isFinish()){
             // Game Clear
@@ -245,28 +270,60 @@ public class Game {
         accumulateDistance++;
 
         moveAround(); // Branch Block이 아니라는 가정 필수
-        this.prevPos.setValue(this.playerPos.x,this.playerPos.y);
-        this.model.our.get(this.prevPos.y).get(this.prevPos.x).type = Define.AIR;
-        this.playerPos.setValue(movePos.x, movePos.y);
-        this.model.our.get(this.playerPos.y).get(this.playerPos.x).type = Define.PLAYER;
         lookAround();
 
         if(isBranchBlock()){
             Define.BranchBlock branchBlock = null;
-            if(!Define.branchBlockHashMap.containsKey(Define.HashCode(this.playerPos.x,this.playerPos.y)))
+            if(!Define.branchBlockHashMap.containsKey(Define.HashCode(this.playerPos.x,this.playerPos.y))){
                 branchBlock = makeBranchBlock(this.playerPos.x,this.playerPos.y);
-            // Branch 우선 순위 계산 및 경로로 이동
-            if(branchBlock != null){
+                // Branch 우선 순위 계산 및 경로로 이동
                 Route route = new Route(Define.branchBlockHashMap.get(Define.HashCode(1,0)), playerPos);
                 route.SetList();
                 ArrayList<Define.DestInfo> destInfos = route.Dijkstra(branchBlock);
                 // 어느 방향으로 이동했는지에 대해서도 저장을 해야한다,
 
                 Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos);
-
                 Define.Pos dest = priority.HighestPriorityBranch();
+                for (Route.Direction direction : priority.destResult.directions) {
+                    int distance = 0;
+                    if(direction == Route.Direction.UP)
+                        distance = Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)).up.distance - 1;
+                    if(direction == Route.Direction.DOWN)
+                        distance = Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)).down.distance - 1;
+                    if(direction == Route.Direction.LEFT)
+                        distance = Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)).left.distance - 1;
+                    if(direction == Route.Direction.RIGHT)
+                        distance = Define.branchBlockHashMap.get(Define.HashCode(playerPos.x,playerPos.y)).right.distance - 1;
 
-                System.out.print("test");
+                    checkIsEndEnergy();
+                    decreaseEnergy();
+                    increaseMana();
+                    moveDirection(direction);
+                    for(int i=0; i < distance; i++){
+                        checkIsEndEnergy();
+                        decreaseEnergy();
+                        increaseMana();
+                        moveAround();
+                    }
+                }
+
+                checkIsEndEnergy();
+                int x_sub = playerPos.x-prevPos.x;
+                int y_sub = playerPos.y-prevPos.y;
+                decreaseEnergy();
+                increaseMana();
+                // left
+                if(x_sub == 1)
+                    moveDirection(Route.Direction.LEFT);
+                // right
+                if(x_sub == -1)
+                    moveDirection(Route.Direction.RIGHT);
+                // down
+                if(y_sub == -1)
+                    moveDirection(Route.Direction.DOWN);
+                // up
+                if(y_sub == 1)
+                    moveDirection(Route.Direction.UP);
             }
         }
         if(isMana()){

@@ -10,17 +10,19 @@ public class Priority {
         public ArrayList<Define.DestInfo> destInfos;
         public Define.orientation going = new Define.orientation(false,-1, null);
         public int maxPriority; //minValue, 게임 end
+        public Define.DestInfo destResult = null;
 
         public BranchPriority(Model model, ArrayList<Define.DestInfo> destInfos) {
             this.model = model;
             this.destInfos = destInfos;
         }
 
-        private void updatePriority(Define.orientation udlr, int priority, int distance, int x, int y) {
+        private void updatePriority(Define.orientation udlr, int priority, int distance, int x, int y, Define.DestInfo destInfo) {
             if (udlr.exist == true && udlr.linkedBranch == null) {
                 udlr.priority = -10 * priority - distance;
                 if (udlr.priority > maxPriority) {
                     maxPriority = udlr.priority;
+                    destResult = destInfo;
                     going = udlr;
                     location.x = x;
                     location.y = y;
@@ -43,10 +45,10 @@ public class Priority {
 
                 //Math.min : 벽까지의 최소거리
                 //destDistance : 현재 위치에서 브랜치까지의 최소거리
-                updatePriority(branchBlock.up, Math.min(x, y - 1), destDistance, x, y - 1);
-                updatePriority(branchBlock.down, Math.min(x, y + 1), destDistance, x, y + 1);
-                updatePriority(branchBlock.right, Math.min(x + 1, y), destDistance, x + 1, y);
-                updatePriority(branchBlock.left, Math.min(x - 1, y), destDistance, x - 1, y);
+                updatePriority(branchBlock.up, Math.min(x, y - 1), destDistance, x, y - 1,dest);
+                updatePriority(branchBlock.down, Math.min(x, y + 1), destDistance, x, y + 1,dest);
+                updatePriority(branchBlock.right, Math.min(x + 1, y), destDistance, x + 1, y,dest);
+                updatePriority(branchBlock.left, Math.min(x - 1, y), destDistance, x - 1, y,dest);
             }
 
             return location;
