@@ -284,6 +284,13 @@ public class Game {
 
                 Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos);
                 Define.Pos dest = priority.HighestPriorityBranch();
+
+                if(priority.maxPriority == Integer.MIN_VALUE){
+                    // Game Over
+                    System.out.println("이동할 수 있는 맵이 미존재");
+                    System.exit(0);
+                }
+
                 for (Route.Direction direction : priority.destResult.directions) {
                     int distance = 0;
                     if(direction == Route.Direction.UP)
@@ -308,8 +315,8 @@ public class Game {
                 }
 
                 checkIsEndEnergy();
-                int x_sub = playerPos.x-prevPos.x;
-                int y_sub = playerPos.y-prevPos.y;
+                int x_sub = playerPos.x-dest.x;
+                int y_sub = playerPos.y-dest.y;
                 decreaseEnergy();
                 increaseMana();
                 // left

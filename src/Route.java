@@ -93,29 +93,33 @@ public class Route {
             //각각의 4방향의 linked branch 여부 확인 후, 경로의 길이를 비교한 뒤 더 짧은 경로가 있다면 업데이트
             if(nowBranch.up.linkedBranch != null && dis[List.indexOf(nowBranch.up.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.up.distance) {
                 dis[List.indexOf(nowBranch.up.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.up.distance;
-                now.directions.add(Direction.UP);
-                routeTable.set(List.indexOf(nowBranch.up.linkedBranch),now.directions);
+                route = now.directions;
+                route.add(Direction.UP);
+                routeTable.set(List.indexOf(nowBranch.up.linkedBranch),route);
 
                 pq.offer(new Define.DestInfo(nowBranch.up.linkedBranch, dis[List.indexOf(nowBranch.up.linkedBranch)]));
             }
             if(nowBranch.down.linkedBranch != null && dis[List.indexOf(nowBranch.down.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.down.distance) {
                 dis[List.indexOf(nowBranch.down.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.down.distance;
-                now.directions.add(Direction.DOWN);
-                routeTable.set(List.indexOf(nowBranch.down.linkedBranch),now.directions);
+                route = now.directions;
+                route.add(Direction.DOWN);
+                routeTable.set(List.indexOf(nowBranch.down.linkedBranch),route);
 
                 pq.offer(new Define.DestInfo(nowBranch.down.linkedBranch, dis[List.indexOf(nowBranch.down.linkedBranch)]));
             }
             if(nowBranch.left.linkedBranch != null && dis[List.indexOf(nowBranch.left.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.left.distance) {
                 dis[List.indexOf(nowBranch.left.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.left.distance;
-                now.directions.add(Direction.LEFT);
-                routeTable.set(List.indexOf(nowBranch.left.linkedBranch),now.directions);
+                route = now.directions;
+                route.add(Direction.LEFT);
+                routeTable.set(List.indexOf(nowBranch.left.linkedBranch),route);
 
                 pq.offer(new Define.DestInfo(nowBranch.left.linkedBranch, dis[List.indexOf(nowBranch.left.linkedBranch)]));
             }
             if(nowBranch.right.linkedBranch != null && dis[List.indexOf(nowBranch.right.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.right.distance) {
                 dis[List.indexOf(nowBranch.right.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.right.distance;
-                now.directions.add(Direction.RIGHT);
-                routeTable.set(List.indexOf(nowBranch.right.linkedBranch),now.directions);
+                route = now.directions;
+                route.add(Direction.RIGHT);
+                routeTable.set(List.indexOf(nowBranch.right.linkedBranch),route);
 
                 pq.offer(new Define.DestInfo(nowBranch.right.linkedBranch, dis[List.indexOf(nowBranch.right.linkedBranch)]));
             }

@@ -158,10 +158,8 @@ public class Define {
 
             if (this.distance > o.distance)
                 return 1;
-            else if (this.distance < o.distance)
-                return -1;
             else
-                return 0;
+                return -1;
         }
     }
 
