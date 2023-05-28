@@ -2,7 +2,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Priority {
-
     public static class BranchPriority {
         public Model model;
         public Pos location = new Pos();
@@ -10,11 +9,13 @@ public class Priority {
         public DestInfo destResult;
         public double maxPriority; //minValue, 게임 end
         public Pos goal;
+        public LoopUnknownChecker loopUnknownChecker;
 
         public BranchPriority(Model model, ArrayList<DestInfo> destInfos, Pos goal) {
             this.model = model;
             this.destInfos = destInfos;
             setGoal(goal);
+            loopUnknownChecker = new LoopUnknownChecker(model);
         }
 
         public void setGoal(Pos goal) {this.goal = goal;}
@@ -200,8 +201,8 @@ public class Priority {
             //골 위치를 모를 경우
             if (goal == null) {
                 //현재 위치를 기준으로 대칭점 구하기
-                int symX = row - location.x;
-                int symY = col - location.y;
+                int symX = col - location.x;
+                int symY = row - location.y;
 
                 for (ScanPoint point : scanCenter) {
                     //미스캔 영역 + 외곽 스캔그리드 탐색
