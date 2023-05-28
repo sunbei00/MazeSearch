@@ -86,9 +86,7 @@ public class Route {
             now.directions = new ArrayList<Define.Direction>();
             now.directions.addAll(routeTable.get(List.indexOf(nowBranch)));
 
-            for(int i = 0; i< now.directions.size(); i++) {
-                route.set(i, now.directions.get(i));
-            }
+
             //방문 여부 확인
             if(check[List.indexOf(nowBranch)]) continue;
             check[List.indexOf(nowBranch)] = true;
@@ -97,6 +95,12 @@ public class Route {
             //각각의 4방향의 linked branch 여부 확인 후, 경로의 길이를 비교한 뒤 더 짧은 경로가 있다면 업데이트
             if(nowBranch.up.linkedBranch != null && dis[List.indexOf(nowBranch.up.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.up.distance) {
                 dis[List.indexOf(nowBranch.up.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.up.distance;
+                if(now.directions.isEmpty()) route.clear();
+                else {
+                    route.clear();
+                    for (int i = 0; i < now.directions.size(); i++)
+                        route.add(i, now.directions.get(i));
+                }
                 route.add(Define.Direction.UP);
                 for(int i = 0; i < route.size(); i++) {
                     routeTable.get(List.indexOf(nowBranch.up.linkedBranch)).add(i, route.get(i));
@@ -105,6 +109,12 @@ public class Route {
             }
             if(nowBranch.down.linkedBranch != null && dis[List.indexOf(nowBranch.down.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.down.distance) {
                 dis[List.indexOf(nowBranch.down.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.down.distance;
+                if(now.directions.isEmpty()) route.clear();
+                else {
+                    route.clear();
+                    for (int i = 0; i < now.directions.size(); i++)
+                        route.add(i, now.directions.get(i));
+                }
                 route.add(Define.Direction.DOWN);
                 for(int i = 0; i < route.size(); i++) {
                     routeTable.get(List.indexOf(nowBranch.down.linkedBranch)).add(i, route.get(i));
@@ -113,6 +123,12 @@ public class Route {
             }
             if(nowBranch.left.linkedBranch != null && dis[List.indexOf(nowBranch.left.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.left.distance) {
                 dis[List.indexOf(nowBranch.left.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.left.distance;
+                if(now.directions.isEmpty()) route.clear();
+                else {
+                    route.clear();
+                    for (int i = 0; i < now.directions.size(); i++)
+                        route.add(i, now.directions.get(i));
+                }
                 route.add(Define.Direction.LEFT);
                 for(int i = 0; i < route.size(); i++) {
                     routeTable.get(List.indexOf(nowBranch.left.linkedBranch)).add(i, route.get(i));
@@ -121,6 +137,12 @@ public class Route {
             }
             if(nowBranch.right.linkedBranch != null && dis[List.indexOf(nowBranch.right.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.right.distance) {
                 dis[List.indexOf(nowBranch.right.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.right.distance;
+                if(now.directions.isEmpty()) route.clear();
+                else {
+                    route.clear();
+                    for (int i = 0; i < now.directions.size(); i++)
+                        route.add(i, now.directions.get(i));
+                }
                 route.add(Define.Direction.RIGHT);
                 for(int i = 0; i < route.size(); i++) {
                     routeTable.get(List.indexOf(nowBranch.right.linkedBranch)).add(i, route.get(i));
@@ -131,10 +153,8 @@ public class Route {
         }
         //리스트에 각 브랜치와 최소길이를 add
         for(int i = 0; i < dis.length; i++) {
-            System.out.println(routeTable);
             BBList.add(new DestInfo(List.get(i), dis[i],routeTable.get(i)));
         }
-
         return BBList;
     }
 }
