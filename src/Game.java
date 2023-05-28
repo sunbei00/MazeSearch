@@ -40,7 +40,7 @@ public class Game {
             this.mana = 3.0f;
     }
     public boolean isMana(){
-        if(Math.abs(this.mana - 3.0f) <= 10e-4) // float error
+        if(Math.abs(this.mana - 3.0f) <= 10e-3) // float error
             return true;
         return false;
     }
@@ -158,17 +158,16 @@ public class Game {
 
         MapUtil.lookAround(playerPos, model);
 
-        /*
         if(isMana()){
             // 스캔 우선 순위 계산
             mana = 0.f;
             Priority.ScanPriority scanPriority = new Priority.ScanPriority(model, playerPos, model.our);
+            scanPriority.createScanGrid();
             ScanPoint scanPoint = scanPriority.HighestPriorityScan();
             useScan(scanPoint.x,scanPoint.y);
-            calculatePriorityAndMove();
         }
 
-        */
+
 
     }
 

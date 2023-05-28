@@ -86,7 +86,6 @@ public class Model {
                 game.Move();
                 //game.useBreak(new Define.Pos(3,2));
 
-                /*
                  // path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
@@ -100,7 +99,6 @@ public class Model {
                 }
                 setWritePath("./path/Our" + test + ".bmp");
                 ImgWrite(Define.ImgOutput.Our);
-                */
             }
 
             // our = groundTruth;

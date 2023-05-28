@@ -63,8 +63,8 @@ public class Priority {
         //쥐의 현재 위치, 대칭점 계산
         public Pos location;
 
-        int row = model.getRow();
-        int col = model.getCol();
+        int row;
+        int col;
 
         public Pos goal;
         public Pos goalGrid;
@@ -75,6 +75,8 @@ public class Priority {
             this.model = model;
             this.location = location;
             this.our = our;
+            int row = model.getRow();
+            int col = model.getCol();
         }
         public ScanPriority(Model model, Pos location, ArrayList<ArrayList<Block>> our, Pos goal, Pos goalGrid, boolean back){
             this(model, location, our);
