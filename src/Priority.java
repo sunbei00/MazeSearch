@@ -8,16 +8,20 @@ public class Priority {
         public Pos location = new Pos();
         public ArrayList<DestInfo> destInfos;
         public DestInfo destResult;
-        public int maxPriority; //minValue, 게임 end
+        public double maxPriority; //minValue, 게임 end
+        public Pos goal;
 
-        public BranchPriority(Model model, ArrayList<DestInfo> destInfos) {
+        public BranchPriority(Model model, ArrayList<DestInfo> destInfos, Pos goal) {
             this.model = model;
             this.destInfos = destInfos;
+            setGoal(goal);
         }
 
-        private void updatePriority(DestInfo destInfo, Orientation udlr, int priority, int distance, int x, int y) {
+        public void setGoal(Pos goal) {this.goal = goal;}
+
+        private void updatePriority(DestInfo destInfo, Orientation udlr, double goalDistance, int wall_distance, int destdistance, int x, int y) {
             if (udlr.exist == true && udlr.linkedBranch == null) {
-                udlr.priority = -10 * priority - (10*distance);
+                udlr.priority = -10 * wall_distance - (10*destdistance) - (30*goalDistance);
                 if (udlr.priority > maxPriority) {
                     maxPriority = udlr.priority;
                     destResult = destInfo;
@@ -35,17 +39,24 @@ public class Priority {
 
             for (DestInfo dest : destInfos) {
                 int destDistance = dest.distance;
+                double goalDistance = 0;
 
                 BranchBlock branchBlock = dest.branchBlock;
                 int x = Math.min(branchBlock.x, col - branchBlock.x);
                 int y = Math.min(branchBlock.y, row - branchBlock.y);
 
+                if(goal != null) {
+                    int xDiff = branchBlock.x - goal.x;
+                    int yDiff = branchBlock.y - goal.y;
+                    goalDistance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+                }
+
                 //Math.min : 벽까지의 최소거리
                 //destDistance : 현재 위치에서 브랜치까지의 최소거리
-                updatePriority(dest, branchBlock.up, Math.min(x, y - 1), destDistance, x, y - 1);
-                updatePriority(dest, branchBlock.down, Math.min(x, y + 1), destDistance, x, y + 1);
-                updatePriority(dest, branchBlock.right, Math.min(x + 1, y), destDistance, x + 1, y);
-                updatePriority(dest, branchBlock.left, Math.min(x - 1, y), destDistance, x - 1, y);
+                updatePriority(dest, branchBlock.up, goalDistance, Math.min(x, y - 1), destDistance, x, y - 1);
+                updatePriority(dest, branchBlock.down, goalDistance, Math.min(x, y + 1), destDistance, x, y + 1);
+                updatePriority(dest, branchBlock.right, goalDistance, Math.min(x + 1, y), destDistance, x + 1, y);
+                updatePriority(dest, branchBlock.left, goalDistance, Math.min(x - 1, y), destDistance, x - 1, y);
             }
 
             return location;
@@ -127,7 +138,7 @@ public class Priority {
             point.priority -= distance;
 
             // 직접 가보지 않은 구역으로, unknown 비율이 높은 경우 우선순위 ↑
-            point.priority += checkUnknown(point);
+            point.priority += 10*Math.sqrt(checkUnknown(point));
         }
 
         public void createScanGrid(){

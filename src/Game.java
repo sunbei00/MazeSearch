@@ -2,7 +2,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Game {
-
+    private ArrayList<Pos> addBranchBlockPos = new ArrayList<>();
     private int energy;
     private float mana;
     private boolean breakItem;
@@ -10,8 +10,10 @@ public class Game {
     private Model model;
     public Pos playerPos = new Pos();
     private Pos prevPos = new Pos(); // Temp for move
+    private Pos goal = null;
     private BranchBlockGraph branchBlockGraph;
 
+    private boolean isFindGoal=false;
     private Priority.ScanPriority scanPriority;
 
     public int getEnergy() {
@@ -60,7 +62,7 @@ public class Game {
         MapUtil.lookAround(playerPos, model);
         prevPos.setValue(1,0);
         branchBlockGraph = new BranchBlockGraph(model);
-        scanPriority = new Priority.ScanPriority(model, playerPos, model.our, null, null, false);
+        scanPriority = new Priority.ScanPriority(model, playerPos, model.our, goal, null, false);
         scanPriority.createScanGrid();
     }
 
@@ -69,6 +71,8 @@ public class Game {
         branchBlockGraph.clear();
         model.our.get(playerPos.y).get(playerPos.x).type = Define.AIR; // for build graph
         branchBlockGraph.checkBranchBlock();
+        for(Pos BranchBlockPos : addBranchBlockPos)
+            branchBlockGraph.addHashMap(BranchBlockPos);
         BranchBlock head = branchBlockGraph.buildGraph();
         model.our.get(playerPos.y).get(playerPos.x).type = Define.PLAYER;
 
@@ -78,7 +82,7 @@ public class Game {
         ArrayList<DestInfo> destInfos = route.Dijkstra(branchBlockGraph.branchBlockHashMap.get(playerPos.hashCode()));
         // 어느 방향으로 이동했는지에 대해서도 저장을 해야한다,
 
-        Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos);
+        Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos, goal);
         Pos dest = priority.HighestPriorityBranch();
 
         if(priority.maxPriority == Integer.MIN_VALUE){
@@ -105,6 +109,9 @@ public class Game {
             MapUtil.applyMove(playerPos, prevPos, model);
             MapUtil.checkFinish(playerPos,energy ,model);
             for(int i=0; i < distance; i++){
+                isFindGoal = false;
+                if(useScanWithScanPriority())
+                    return;
                 checkIsEndEnergy();
                 decreaseEnergy();
                 increaseMana();
@@ -161,21 +168,35 @@ public class Game {
             calculatePriorityAndMove();
 
         MapUtil.lookAround(playerPos, model);
+        useScanWithScanPriority();
 
-        if(isMana()){
-            // 스캔 우선 순위 계산
-            mana = 0.f;
-            ScanPoint scanPoint = scanPriority.HighestPriorityScan();
-            useScan(scanPoint.x,scanPoint.y);
+        if(isFindGoal){
+            isFindGoal = false;
+            calculatePriorityAndMove();
         }
-
-
 
     }
 
+    public boolean useScanWithScanPriority(){
+        isFindGoal = false;
+        if(isMana()){
+            // 스캔 우선 순위 계산
+            boolean isEmptyGoal = goal == null? true : false;
+            mana = 0.f;
+            ScanPoint scanPoint = scanPriority.HighestPriorityScan();
+            useScan(scanPoint.x,scanPoint.y);
+            if(isEmptyGoal && goal != null){
+                addBranchBlockPos.add(playerPos);
+                isFindGoal = true;
+                return true;
+            }
+        }
+        return false;
+    }
     public boolean useScan(int x, int y){
+        Pos look = new Pos();
         for(Pos p : Define.sacnBoundary){
-            Pos look = new Pos(x, y);
+            look.setValue(x,y);
             look.x += p.x;
             look.y += p.y;
             Util.calcIndex(look,model);
@@ -188,8 +209,13 @@ public class Game {
 
             if(look.x == 0 || look.x == this.model.getCol() - 1 || look.y == 0 || look.y == this.model.getRow() -1)
                 if(!(look.x == 1 && look.y == 0))  // 출발점을 제외한 벽의 양 끝에 길이 있으면 목적지
-                    if(this.model.groundTruth.get(look.y).get(look.x).type == Define.AIR)
-                        this.model.our.get(look.y).get(look.x).type = Define.GOAL;
+                    if(this.model.groundTruth.get(look.y).get(look.x).type == Define.AIR){
+                        if(goal == null)
+                            goal = new Pos(look.x, look.y);
+                        scanPriority.setGoal(goal);
+                        scanPriority.setGoalGrid(new Pos(x,y));
+                        scanPriority.setBack(false);
+                    }
         }
         return true;
     }

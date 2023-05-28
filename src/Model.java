@@ -2,7 +2,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.io.*;
-import java.util.HashMap;
 import java.util.Iterator;
 
 
@@ -102,7 +101,7 @@ public class Model {
             }
 
             // our = groundTruth;
-            /*
+/*
             BranchBlockGraph bbg = new BranchBlockGraph(this);
             bbg.clear();
             our.get(game.playerPos.y).get(game.playerPos.x).type = Define.AIR; // for build graph
@@ -113,8 +112,7 @@ public class Model {
             for(BranchBlock b : bbg.branchBlockHashMap.values()){
                 our.get(b.y).get(b.x).type = Define.BRANCH_BLOCK;
             }
-
-             */
+*/
 
 
             setWritePath("Result.txt");

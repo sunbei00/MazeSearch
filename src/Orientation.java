@@ -1,7 +1,7 @@
 public class Orientation {
     boolean exist;
     int distance;
-    int priority;
+    double priority;
     BranchBlock linkedBranch;
     public Orientation(boolean exist, int distance, BranchBlock linkedBranch){
         this.exist = exist;
