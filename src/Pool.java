@@ -18,6 +18,21 @@ public class Pool {
         }
     }
 
+    public static class PosPool {
+
+        private Stack<Pos> stack = new Stack<>();
+
+        public Pos get(){
+            if(stack.size() != 0)
+                return stack.pop();
+            return new Pos(0,0);
+        }
+        public void push(Pos push){
+            stack.push(push);
+            push = null;
+        }
+    }
+
     public static class LinkPool {
         static class Link{
             public BranchBlock prevBranchBlock;

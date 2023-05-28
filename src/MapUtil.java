@@ -133,7 +133,6 @@ public class MapUtil {
 
     public static Pos moveDirection(Pos playerPos, Define.Direction direction, Model model) {
         // direction 방향의 Block이 아니라는 가정이 필수!! 잊지말기!!
-        movePos.setValue(playerPos.x, playerPos.y);
         look.setValue(playerPos.x, playerPos.y);
         if(direction == Define.Direction.UP)
             look.y += -1;
@@ -148,30 +147,5 @@ public class MapUtil {
             movePos.setValue(look.x, look.y);
 
         return movePos;
-    }
-
-    public static boolean isDeadEnd(BranchBlock branchBlock, Define.Direction direction, Model model){
-        look.setValue(branchBlock.x, branchBlock.y);
-        Pos tmp = moveDirection(look, direction, model);
-        look.setValue(tmp.x, tmp.y);
-
-        int count = 0;
-        tmp = moveDirection(look, Define.Direction.LEFT, model);
-        if(model.our.get(tmp.y).get(tmp.y).type == Define.WALL)
-            count++;
-        tmp = moveDirection(look, Define.Direction.RIGHT, model);
-        if(model.our.get(tmp.y).get(tmp.y).type == Define.WALL)
-            count++;
-        tmp = moveDirection(look, Define.Direction.UP, model);
-        if(model.our.get(tmp.y).get(tmp.y).type == Define.WALL)
-            count++;
-        tmp = moveDirection(look, Define.Direction.DOWN, model);
-        if(model.our.get(tmp.y).get(tmp.y).type == Define.WALL)
-            count++;
-
-        if(count >= 3)
-            return true;
-
-        return false;
     }
 }
