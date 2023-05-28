@@ -49,17 +49,17 @@ public class BranchBlockUtil {
             look.x += p.x;
             look.y += p.y;
             Util.calcIndex(look,model);
-            if (model.our.get(look.y).get(look.x).type == Define.AIR) {
+            if (model.our.get(look.y).get(look.x).type == Define.WALL) {
                 if(playerPos.x == look.x && playerPos.y == look.y) // 시작점 위 방향 처리.
                     continue;
                 if(p.x == 1) // right
-                    branchBlock.right.exist = true;
+                    branchBlock.right.exist = false;
                 if(p.x == -1) // left
-                    branchBlock.left.exist = true;
+                    branchBlock.left.exist = false;
                 if(p.y == 1) // down
-                    branchBlock.down.exist = true;
+                    branchBlock.down.exist = false;
                 if(p.y == -1) // up
-                    branchBlock.up.exist = true;
+                    branchBlock.up.exist = false;
             }
         }
     }

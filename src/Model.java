@@ -14,7 +14,6 @@ public class Model {
     private int col = -1;
     public ArrayList<ArrayList<Block>> groundTruth = null;
     public ArrayList<ArrayList<Block>> our = null;
-    public ArrayList<ScanBlock> scan = new ArrayList<>();
 
     public Model() {}
     public Model(String readPath){
@@ -66,6 +65,8 @@ public class Model {
         }
     }
 
+
+    public int test = 0; // tmp
     public void buildOur(){
         try{
             if(readPath == null)
@@ -77,16 +78,14 @@ public class Model {
                 for(int j=0;j<col;j++)
                     this.our.get(i).add(new Block(Define.UNKNOWN));
             }
-            scan.clear();
 
             Game game = new Game(this);
 
             //game.useScan(new Define.Pos(10,10));
-            for(int i=0;i < 15;i++){ // getRow()*getCol()*2
+            for(test=0;test < 64;test++){ // getRow()*getCol()*2
                 game.Move();
                 //game.useBreak(new Define.Pos(3,2));
 
-                /*
                  // path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
@@ -98,13 +97,13 @@ public class Model {
                         e.getStackTrace();
                     }
                 }
-                setWritePath("./path/Our" + i + ".bmp");
+                setWritePath("./path/Our" + test + ".bmp");
                 ImgWrite(Define.ImgOutput.Our);
-                */
             }
 
 
             // our = groundTruth;
+            /*
             BranchBlockGraph bbg = new BranchBlockGraph(this);
             bbg.clear();
             our.get(game.playerPos.y).get(game.playerPos.x).type = Define.AIR; // for build graph
@@ -116,6 +115,7 @@ public class Model {
                 our.get(b.y).get(b.x).type = Define.BRANCH_BLOCK;
             }
 
+             */
 
 
             setWritePath("Result.txt");

@@ -44,6 +44,14 @@ public class MapUtil {
         return false;
     }
 
+    public static void checkFinish(Pos playerPos, Model model){
+        if(isFinish(playerPos,model)){
+            // FILE WRITE
+            System.out.println("탈출!!");
+            System.exit(0);
+        }
+    }
+
     public static boolean isBranchBlock(Pos playerPos, Model model){
          /*
             경우의 수 ( n := 길의 수 )

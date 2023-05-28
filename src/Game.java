@@ -108,42 +108,45 @@ public class Game {
             }
         }
 
-        checkIsEndEnergy();
+        MapUtil.lookAround(playerPos,model);
+        MapUtil.checkFinish(playerPos,model);
+
+        if(model.test == 63){
+            System.out.println("Check");
+        }
+
         Define.Direction direction = MapUtil.getDirection(playerPos, dest);
-        decreaseEnergy();
-        increaseMana();
-        // left
-        if(direction == Define.Direction.LEFT){
-            MapUtil.moveDirection(playerPos,Define.Direction.LEFT, model);
-            MapUtil.applyMove(playerPos, prevPos, model);
+        if(MapUtil.isAir(playerPos,direction,model)){
+            checkIsEndEnergy();
+            decreaseEnergy();
+            increaseMana();
+            // left
+            if(direction == Define.Direction.LEFT){
+                MapUtil.moveDirection(playerPos,Define.Direction.LEFT, model);
+                MapUtil.applyMove(playerPos, prevPos, model);
+            }
+            // right
+            if(direction == Define.Direction.RIGHT){
+                MapUtil.moveDirection(playerPos,Define.Direction.RIGHT, model);
+                MapUtil.applyMove(playerPos, prevPos, model);
+            }
+            // down
+            if(direction == Define.Direction.DOWN){
+                MapUtil.moveDirection(playerPos,Define.Direction.DOWN, model);
+                MapUtil.applyMove(playerPos, prevPos, model);
+            }
+            // up
+            if(direction == Define.Direction.UP){
+                MapUtil.moveDirection(playerPos,Define.Direction.UP, model);
+                MapUtil.applyMove(playerPos, prevPos, model);
+            }
+            if(direction == Define.Direction.UNKNOWN) // Error Check
+                System.out.println("direction Unkwon Error");
         }
-        // right
-        if(direction == Define.Direction.RIGHT){
-            MapUtil.moveDirection(playerPos,Define.Direction.RIGHT, model);
-            MapUtil.applyMove(playerPos, prevPos, model);
-        }
-        // down
-        if(direction == Define.Direction.DOWN){
-            MapUtil.moveDirection(playerPos,Define.Direction.DOWN, model);
-            MapUtil.applyMove(playerPos, prevPos, model);
-        }
-        // up
-        if(direction == Define.Direction.UP){
-            MapUtil.moveDirection(playerPos,Define.Direction.UP, model);
-            MapUtil.applyMove(playerPos, prevPos, model);
-        }
-        if(direction == Define.Direction.UNKNOWN) // Error Check
-            System.out.println("direction Unkwon Error");
     }
     public void Move(){
         // GAME OVER : 우선순위 계산 할 Branch가 미존재 할 시 (우선순위에서 계산해야 할 듯)
-        if(MapUtil.isFinish(playerPos,model)){
-            // Game Clear
-            // FILE WRITE
-            // Exit
-            System.out.println("isFinish");
-            System.exit(0);
-        }
+        MapUtil.checkFinish(playerPos,model);
         checkIsEndEnergy();
         decreaseEnergy();
         increaseMana();
@@ -152,46 +155,42 @@ public class Game {
         MapUtil.applyMove(playerPos, prevPos, model);
         MapUtil.lookAround(playerPos, model);
 
-
-
-        model.setWritePath("./Our.bmp");
-        model.ImgWrite(Define.ImgOutput.Our);
-
         if(MapUtil.isBranchBlock(playerPos, model))
             calculatePriorityAndMove();
 
         MapUtil.lookAround(playerPos, model);
 
-                /*
+        /*
         if(isMana()){
             // 스캔 우선 순위 계산
             mana = 0.f;
-            Priority.ScanPriority scanPriority = new Priority.ScanPriority(model,playerPos,model.our);
-            Define.ScanPoint scanPoint = scanPriority.HighestPriorityScan();
-            look.setValue(scanPoint.x,scanPoint.y);
-            useScan(look);
+            Priority.ScanPriority scanPriority = new Priority.ScanPriority(model, playerPos, model.our);
+            ScanPoint scanPoint = scanPriority.HighestPriorityScan();
+            useScan(scanPoint.x,scanPoint.y);
             calculatePriorityAndMove();
         }
+
         */
+
     }
 
-    public boolean useScan(Pos pos){
+    public boolean useScan(int x, int y){
         for(Pos p : Define.sacnBoundary){
-            Pos look = new Pos(pos.x, pos.y);
+            Pos look = new Pos(x, y);
             look.x += p.x;
             look.y += p.y;
             Util.calcIndex(look,model);
             if(this.model.our.get(look.y).get(look.x).type != Define.UNKNOWN) // 이미 알고있으면 계산x
                 continue;
             if(this.model.groundTruth.get(look.y).get(look.x).type == Define.WALL) // 벽 표시
-                this.model.scan.add(new ScanBlock(Define.WALL, look));
+                this.model.our.get(look.y).get(look.x).type = Define.WALL;
             if(this.model.groundTruth.get(look.y).get(look.x).type == Define.AIR) // 길 표시
-                this.model.scan.add(new ScanBlock(Define.AIR, look));
+                this.model.our.get(look.y).get(look.x).type = Define.AIR;
 
             if(look.x == 0 || look.x == this.model.getCol() - 1 || look.y == 0 || look.y == this.model.getRow() -1)
                 if(!(look.x == 1 && look.y == 0))  // 출발점을 제외한 벽의 양 끝에 길이 있으면 목적지
                     if(this.model.groundTruth.get(look.y).get(look.x).type == Define.AIR)
-                        this.model.scan.add(new ScanBlock(Define.GOAL, look));
+                        this.model.our.get(look.y).get(look.x).type = Define.GOAL;
         }
         return true;
     }
