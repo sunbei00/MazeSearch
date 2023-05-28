@@ -1,7 +1,5 @@
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 
 public class Priority {
 
@@ -111,34 +109,54 @@ public class Priority {
 
             double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
 
-            // 대칭점과 가까울수록 우선순위 ↑
+            //골 x → 대칭점과 가까울수록 외곽 스캔그리드 우선순위 ↑
+            //골 o
+            //1) 지난 경로 back
+            // → 골과 가장 가까운 길을 찾고, 해당 길과 가까운 스캔그리드 우선순위 ↑
+            //2) keep going
+            // → 골 그리드와 인접하면서, 쥐의 현재 위치와 가까운 스캔그리드 우선순위 ↑
             point.priority -= distance;
 
             // 직접 가보지 않은 구역으로, unknown 비율이 높은 경우 우선순위 ↑
             point.priority += checkUnknown(point);
         }
 
-
-        //우선순위 스캔 구역 선정
-        public ScanPoint HighestPriorityScan() {
+        public void createScanGrid(){
             //각 스캔그리드 중심 좌표, 5n*5n 구역만 고려 //최외각만 따로 그리드 생성하는 방식으로 바꾸기!
 
-            int right = ((col - 2) / 5) * 5 + 2;
-            int bottom = ((row - 2) / 5) * 5 + 2;
+            //최외각 스캔그리드 중심 좌표 조절
+            int balanceX = 0;
+            int balanceY = 0;
+
+            if(row%5!=0) {
+                balanceY = row % 5;
+            }
+
+            if(col%5!=0) {
+                balanceX = col % 5;
+            }
 
 
             //외곽 스캔그리드
             for (int i = 2; i < row; i += 5) {
+                // 마지막 i에서 +plusY를 하는 로직
+                if(i+5>=row)
+                    i += balanceY;
+
                 ScanPoint leftcenter = new ScanPoint(2, i, false, true);
                 scanCenter.add(leftcenter);
-                ScanPoint rightcenter = new ScanPoint(right, i, false, true);
+                ScanPoint rightcenter = new ScanPoint(col-balanceX, i, false, true);
                 scanCenter.add(rightcenter);
             }
 
             for (int i = 2; i < col; i += 5) {
+                // 마지막 i에서 +plusX를 하는 로직
+                if(i+5>=col)
+                    i+=balanceX;
+
                 ScanPoint topcenter = new ScanPoint(i, 2, false, true);
                 scanCenter.add(topcenter);
-                ScanPoint bottomcenter = new ScanPoint(i, bottom, false, true);
+                ScanPoint bottomcenter = new ScanPoint(i, row-balanceY, false, true);
                 scanCenter.add(bottomcenter);
             }
 
@@ -151,36 +169,40 @@ public class Priority {
                     }
                 }
             }
+        }
 
+        //우선순위 스캔 구역 선정
+        public ScanPoint HighestPriorityScan() {
+            double maxPriority = Double.MIN_VALUE;
+            ScanPoint scanPoint = new ScanPoint(-1, -1, false, false);
+
+            //골 위치를 모를 경우
             if (goal == null) {
-
                 //현재 위치를 기준으로 대칭점 구하기
                 int symX = row - location.x;
                 int symY = col - location.y;
 
-                double maxPriority = Double.MIN_VALUE;
-                ScanPoint scanPoint = new ScanPoint(1, 1, false, false);
-
                 for (ScanPoint point : scanCenter) {
-                    //미스캔 영역
-                    if (point.visited == false && scanPoint.side == true)
+                    //미스캔 영역 + 외곽 스캔그리드 탐색
+                    if (!point.visited && scanPoint.side) {
                         calculatePriority(point, symX, symY);
 
-                    //스캔 우선순위 계산
-                    if (maxPriority < point.priority) {
-                        maxPriority = point.priority;
-                        scanPoint = point;
+                        //스캔 우선순위 계산
+                        if (maxPriority < point.priority) {
+                            maxPriority = point.priority;
+                            scanPoint = point;
+                        }
                     }
                 }
+
+                //스캔그리드 방문
+                scanPoint.visited = true;
 
                 return scanPoint;
             }
 
             //골 위치 파악
             else {
-                double maxPriority = Double.MIN_VALUE;
-                ScanPoint scanPoint = new ScanPoint(1, 1, false, false);
-
                 //지난 경로로 돌아가는 경우
                 //→ 골과 가장 가까운 길을 찾고, 해당 길과 가까운 스캔그리드를 높은 우선순위 부여
                 if (back) {
@@ -206,16 +228,16 @@ public class Priority {
                     //골과 가까운 길과 스캔그리드와의 우선순위 계산을 통해 스캔 구역 선정
                     for (ScanPoint point : scanCenter) {
                         //미스캔 영역
-                        if (point.visited == false)
+                        if (!point.visited) {
                             calculatePriority(point, minMapX, minMapY);
 
-                        //스캔 우선순위 계산
-                        if (maxPriority < point.priority) {
-                            maxPriority = point.priority;
-                            scanPoint = point;
+                            //스캔 우선순위 계산
+                            if (maxPriority < point.priority) {
+                                maxPriority = point.priority;
+                                scanPoint = point;
+                            }
                         }
                     }
-                    return scanPoint;
                 }
 
                 //계속 앞으로 탐색
@@ -248,21 +270,26 @@ public class Priority {
 
                     //골 스캔그리드와 인접한 그리드 중 (현재위치, unknown) 정보에 따라 우선순위 부여
                     for (ScanPoint point : goalNearCenter) {
-                        int mouseDiffX = point.x - location.x;
-                        int mouseDiffY = point.y - location.y;
+                        if(point.visited==false) {
+                            calculatePriority(point, location.x, location.y);
 
-                        double mouseDistance = Math.sqrt(mouseDiffX * mouseDiffX + mouseDiffY * mouseDiffY);
-
-                        //쥐의 현재 위치와 가까운 그리드일 수록
-                        point.priority -= mouseDistance;
-
-                        //직접 가보지 않은 구역으로, unknown 비율이 높은 경우 우선순위 ↑
-                        point.priority += checkUnknown(point);
+                            //스캔 우선순위 계산
+                            if (maxPriority < point.priority) {
+                                maxPriority = point.priority;
+                                scanPoint = point;
+                            }
+                        }
                     }
-                }
 
-                return scanPoint;
+                    //골 그리드를 바꿔주기 => 다음 스캔할 때 해당 그리드의 인접 그리드를 탐색하기 위해
+                    goalGrid.x = scanPoint.x;
+                    goalGrid.y = scanPoint.y;
+                }
             }
+            //스캔그리드 방문
+            scanPoint.visited = true;
+
+            return scanPoint;
         }
     }
 }
