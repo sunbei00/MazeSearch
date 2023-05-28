@@ -63,25 +63,33 @@ public class Priority {
         //쥐의 현재 위치, 대칭점 계산
         public Pos location;
 
-        int row;
-        int col;
+        int row = 0;
+        int col = 0;
 
         public Pos goal;
         public Pos goalGrid;
         boolean back;
 
         //현재 쥐의 위치와, 알고있는 Map 정보
-        public ScanPriority(Model model, Pos location, ArrayList<ArrayList<Block>> our){
+        public ScanPriority(Model model, Pos location, ArrayList<ArrayList<Block>> our, Pos goal, Pos goalGrid, boolean back){
             this.model = model;
             this.location = location;
             this.our = our;
-            int row = model.getRow();
-            int col = model.getCol();
+            row = model.getRow();
+            col = model.getCol();
+            setGoal(goal);
+            setGoalGrid(goalGrid);
+            setBack(back);
         }
-        public ScanPriority(Model model, Pos location, ArrayList<ArrayList<Block>> our, Pos goal, Pos goalGrid, boolean back){
-            this(model, location, our);
+        public void setGoal(Pos goal) {
             this.goal = goal;
+        }
+
+        public void setGoalGrid(Pos goalGrid) {
             this.goalGrid = goalGrid;
+        }
+
+        public void setBack(boolean back) {
             this.back = back;
         }
 
