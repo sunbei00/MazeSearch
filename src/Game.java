@@ -12,6 +12,8 @@ public class Game {
     private Pos prevPos = new Pos(); // Temp for move
     private BranchBlockGraph branchBlockGraph;
 
+    private Priority.ScanPriority scanPriority;
+
     public int getEnergy() {
         return energy;
     }
@@ -58,6 +60,8 @@ public class Game {
         MapUtil.lookAround(playerPos, model);
         prevPos.setValue(1,0);
         branchBlockGraph = new BranchBlockGraph(model);
+        scanPriority = new Priority.ScanPriority(model, playerPos, model.our, null, null, false);
+        scanPriority.createScanGrid();
     }
 
     private void calculatePriorityAndMove(){
@@ -161,8 +165,6 @@ public class Game {
         if(isMana()){
             // 스캔 우선 순위 계산
             mana = 0.f;
-            Priority.ScanPriority scanPriority = new Priority.ScanPriority(model, playerPos, model.our, null, null, false);
-            scanPriority.createScanGrid();
             ScanPoint scanPoint = scanPriority.HighestPriorityScan();
             useScan(scanPoint.x,scanPoint.y);
         }
