@@ -8,13 +8,9 @@ public class Game {
     private boolean breakItem;
     private Pos breakPos;
     private Model model;
-    private Pos playerPos = new Pos();
-    private Pos look = new Pos(); // optimize memory (Temp)
+    public Pos playerPos = new Pos();
     private Pos prevPos = new Pos(); // Temp for move
-    private Pos movePos = new Pos(); // Temp for moveAround
-    private BranchBlock prevBranchBlock = null;
-    private int accumulateDistance = 0;
-    private Define.Direction prevBranchDirection;
+    private BranchBlockGraph branchBlockGraph;
 
     public int getEnergy() {
         return energy;
@@ -57,46 +53,25 @@ public class Game {
         this.mana = 3.0f;
         this.breakItem = true;
 
-
         this.playerPos.setValue(1,0);
         this.model.our.get(this.playerPos.y).get(this.playerPos.x).type = Define.PLAYER;
         MapUtil.lookAround(playerPos, model);
-        model.branchBlockHashMap.clear();
-        model.branchBlockHashMap.put(Util.HashCode(1,0), new BranchBlock(1,0));
         prevPos.setValue(1,0);
-        prevBranchBlock = model.branchBlockHashMap.get(Util.HashCode(1,0));
-        if(model.our.get(1).get(1).type == Define.AIR){
-            prevBranchBlock.down.exist = true;
-            //  playerPos.x-prevPos.x    playerPos.y-prevPos.y
-            prevBranchDirection = Define.Direction.DOWN;
-
-        }else{
-            // Game Over
-        }
-        accumulateDistance = 0;
-    }
-
-    BranchBlock makeBranchBlock(int x,int y){
-        System.out.println("Make Branch Block");
-        BranchBlock newBranchBlock = new BranchBlock(playerPos.x, playerPos.y);
-        BranchBlockUtil.linkBranchBlock(newBranchBlock,prevBranchBlock,accumulateDistance,playerPos,prevPos,prevBranchDirection,model);
-        model.branchBlockHashMap.put(newBranchBlock.hashCode(),newBranchBlock);
-        prevBranchBlock = newBranchBlock;
-        accumulateDistance = 0;
-        return newBranchBlock;
+        branchBlockGraph = new BranchBlockGraph(model);
     }
 
     private void calculatePriorityAndMove(){
-        BranchBlock branchBlock = null;
-        if(!model.branchBlockHashMap.containsKey(Util.HashCode(this.playerPos.x,this.playerPos.y)))
-            branchBlock = makeBranchBlock(this.playerPos.x,this.playerPos.y);
-        else
-            branchBlock = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y));
+
+        branchBlockGraph.clear();
+        model.our.get(playerPos.y).get(playerPos.x).type = Define.AIR; // for build graph
+        branchBlockGraph.checkBranchBlock();
+        BranchBlock head = branchBlockGraph.buildGraph();
+        model.our.get(playerPos.y).get(playerPos.x).type = Define.PLAYER;
 
         // Branch 우선 순위 계산 및 경로로 이동
-        Route route = new Route(model.branchBlockHashMap.get(Util.HashCode(1,0)), playerPos, model);
+        Route route = new Route(head, playerPos, branchBlockGraph.branchBlockHashMap);
         route.SetList();
-        ArrayList<DestInfo> destInfos = route.Dijkstra(branchBlock);
+        ArrayList<DestInfo> destInfos = route.Dijkstra(branchBlockGraph.branchBlockHashMap.get(playerPos.hashCode()));
         // 어느 방향으로 이동했는지에 대해서도 저장을 해야한다,
 
         Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos);
@@ -111,13 +86,13 @@ public class Game {
         for (Define.Direction direction : priority.destResult.directions) {
             int distance = 0;
             if(direction == Define.Direction.UP)
-                distance = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).up.distance - 1;
+                distance = branchBlockGraph.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).up.distance - 1;
             if(direction == Define.Direction.DOWN)
-                distance = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).down.distance - 1;
+                distance = branchBlockGraph.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).down.distance - 1;
             if(direction == Define.Direction.LEFT)
-                distance = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).left.distance - 1;
+                distance = branchBlockGraph.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).left.distance - 1;
             if(direction == Define.Direction.RIGHT)
-                distance = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).right.distance - 1;
+                distance = branchBlockGraph.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).right.distance - 1;
 
             checkIsEndEnergy();
             decreaseEnergy();
@@ -134,35 +109,31 @@ public class Game {
         }
 
         checkIsEndEnergy();
-        int x_sub = playerPos.x-dest.x;
-        int y_sub = playerPos.y-dest.y;
+        Define.Direction direction = MapUtil.getDirection(playerPos, dest);
         decreaseEnergy();
         increaseMana();
         // left
-        prevBranchBlock = model.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y));
-        if(x_sub == 1){
+        if(direction == Define.Direction.LEFT){
             MapUtil.moveDirection(playerPos,Define.Direction.LEFT, model);
             MapUtil.applyMove(playerPos, prevPos, model);
-            prevBranchDirection = Define.Direction.LEFT;
         }
         // right
-        if(x_sub == -1){
+        if(direction == Define.Direction.RIGHT){
             MapUtil.moveDirection(playerPos,Define.Direction.RIGHT, model);
             MapUtil.applyMove(playerPos, prevPos, model);
-            prevBranchDirection = Define.Direction.RIGHT;
         }
         // down
-        if(y_sub == -1){
+        if(direction == Define.Direction.DOWN){
             MapUtil.moveDirection(playerPos,Define.Direction.DOWN, model);
             MapUtil.applyMove(playerPos, prevPos, model);
-            prevBranchDirection = Define.Direction.DOWN;
         }
         // up
-        if(y_sub == 1){
+        if(direction == Define.Direction.UP){
             MapUtil.moveDirection(playerPos,Define.Direction.UP, model);
             MapUtil.applyMove(playerPos, prevPos, model);
-            prevBranchDirection = Define.Direction.UP;
         }
+        if(direction == Define.Direction.UNKNOWN) // Error Check
+            System.out.println("direction Unkwon Error");
     }
     public void Move(){
         // GAME OVER : 우선순위 계산 할 Branch가 미존재 할 시 (우선순위에서 계산해야 할 듯)
@@ -173,17 +144,25 @@ public class Game {
             System.out.println("isFinish");
             System.exit(0);
         }
+        checkIsEndEnergy();
         decreaseEnergy();
         increaseMana();
-        accumulateDistance++;
 
         MapUtil.moveAround(playerPos, prevPos, model);
         MapUtil.applyMove(playerPos, prevPos, model);
+        MapUtil.lookAround(playerPos, model);
+
+
+
+        model.setWritePath("./Our.bmp");
+        model.ImgWrite(Define.ImgOutput.Our);
 
         if(MapUtil.isBranchBlock(playerPos, model))
             calculatePriorityAndMove();
 
-        /*
+        MapUtil.lookAround(playerPos, model);
+
+                /*
         if(isMana()){
             // 스캔 우선 순위 계산
             mana = 0.f;
@@ -194,7 +173,6 @@ public class Game {
             calculatePriorityAndMove();
         }
         */
-        MapUtil.lookAround(playerPos, model);
     }
 
     public boolean useScan(Pos pos){

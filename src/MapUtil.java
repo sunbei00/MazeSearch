@@ -111,7 +111,7 @@ public class MapUtil {
         Util.calcIndex(look,model);
         if(look.x == playerPos.x && look.y == playerPos.y) // 시작점을 위해서
             return false;
-        if(model.our.get(look.y).get(look.x).type == Define.AIR || model.our.get(look.y).get(look.x).type == Define.BREAK )
+        if(model.our.get(look.y).get(look.x).type == Define.AIR ||  model.our.get(look.y).get(look.x).type == Define.BREAK)
             return true;
         return false;
     }

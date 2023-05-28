@@ -32,17 +32,16 @@ public class Route {
     public ArrayList<ArrayList<Integer>> Graph = null;
     public Pos pos = null;
     public BranchBlock firstBranch = null;
-
-    public Model model;
+    HashMap<Integer, BranchBlock> branchBlockHashMap;
 
     // 생성자 : 해쉬맵과 현제 pos값을 인자로 받음
-    public Route(BranchBlock branchBlock, Pos pos, Model model) {
+    public Route(BranchBlock branchBlock, Pos pos, HashMap<Integer, BranchBlock> branchBlockHashMap) { // branchBlock : 그래프의 시작점
         firstBranch = branchBlock;
         this.pos = new Pos(pos.x, pos.y);
 
         this.List = new ArrayList<BranchBlock>();
         this.BBList = new ArrayList<DestInfo>();
-        this.model = model;
+        this.branchBlockHashMap = branchBlockHashMap;
     }
 
     public Route(Pos pos) {
@@ -52,7 +51,7 @@ public class Route {
     // 브랜치 블록 리스트 생성
     public void SetList() {
         List.clear();
-        for (BranchBlock b : model.branchBlockHashMap.values())
+        for (BranchBlock b : branchBlockHashMap.values())
             List.add(b);
     }
     /*
@@ -62,7 +61,7 @@ public class Route {
 
     // 최소거리 계산
     // 현재 브랜치 기준으로 각 브랜치까지의 거리를 계산해 DestInfo 타입의 리스트로 저장
-    public ArrayList<DestInfo> Dijkstra (BranchBlock start) {
+    public ArrayList<DestInfo> Dijkstra (BranchBlock start) { // start : 현재 위치
         int size = List.size();
         boolean[] check = new boolean[size];
         int[] dis = new int[size];

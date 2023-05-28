@@ -15,8 +15,6 @@ public class Model {
     public ArrayList<ArrayList<Block>> groundTruth = null;
     public ArrayList<ArrayList<Block>> our = null;
     public ArrayList<ScanBlock> scan = new ArrayList<>();
-    public HashMap<Integer, BranchBlock> branchBlockHashMap = new HashMap<Integer, BranchBlock>();
-
 
     public Model() {}
     public Model(String readPath){
@@ -83,13 +81,13 @@ public class Model {
 
             Game game = new Game(this);
 
-            /*
             //game.useScan(new Define.Pos(10,10));
             for(int i=0;i < 15;i++){ // getRow()*getCol()*2
                 game.Move();
                 //game.useBreak(new Define.Pos(3,2));
 
-                 path 사진으로 출력
+                /*
+                 // path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
                     try{
@@ -102,18 +100,23 @@ public class Model {
                 }
                 setWritePath("./path/Our" + i + ".bmp");
                 ImgWrite(Define.ImgOutput.Our);
-
+                */
             }
-            */
-            our = groundTruth;
+
+
+            // our = groundTruth;
             BranchBlockGraph bbg = new BranchBlockGraph(this);
             bbg.clear();
+            our.get(game.playerPos.y).get(game.playerPos.x).type = Define.AIR; // for build graph
             bbg.checkBranchBlock();
-            BranchBlock firstBlock = bbg.buildGraph();
+            bbg.buildGraph();
+            our.get(game.playerPos.y).get(game.playerPos.x).type = Define.PLAYER; // for build graph
 
             for(BranchBlock b : bbg.branchBlockHashMap.values()){
-                groundTruth.get(b.y).get(b.x).type = Define.BRANCH_BLOCK;
+                our.get(b.y).get(b.x).type = Define.BRANCH_BLOCK;
             }
+
+
 
             setWritePath("Result.txt");
             resultWrite(game.getEnergy());

@@ -1,4 +1,4 @@
 Initial Energy : 18270
-Wasted Energy : 0
-Remain Energy : 18270
+Wasted Energy : 14
+Remain Energy : 18256
 Insert File Name : ./Maze/Maze12.txt
