@@ -49,11 +49,11 @@ public class MapUtil {
         if(isFinish(playerPos,model)){
             // FILE WRITE
             System.out.println("탈출!!");
-            model.setWritePath("result.txt");
             model.setWritePath("./GroundTruth.bmp");
             model.ImgWrite(Define.ImgOutput.GroundTruth);
             model.setWritePath("./Our.bmp");
             model.ImgWrite(Define.ImgOutput.Our);
+            model.setWritePath("result.txt");
             model.resultWrite(remainEnergy);
             System.exit(0);
         }
