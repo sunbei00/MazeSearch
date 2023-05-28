@@ -7,8 +7,6 @@ public class LoopUnknownChecker {
     private ArrayList<ArrayList<Boolean>> graphMap = new ArrayList<ArrayList<Boolean>>();
     private Stack<Pos> checkUnknown = new Stack<>();
     private Pool.PosPool posPool = new Pool.PosPool();
-    private static Pos look = new Pos(); // optimize for memory (Temp)
-    private static Pos movePos = new Pos(); // optimize for memory (Temp)
 
 
     public LoopUnknownChecker(Model model){
@@ -30,21 +28,6 @@ public class LoopUnknownChecker {
                 graphMap.get(i).set(j, false);
     }
 
-    public static Pos DirectionPosition(Pos playerPos, Define.Direction direction, Model model) {
-        look.setValue(playerPos.x, playerPos.y);
-        if(direction == Define.Direction.UP)
-            look.y += -1;
-        if(direction == Define.Direction.DOWN)
-            look.y += 1;
-        if(direction == Define.Direction.LEFT)
-            look.x += -1;
-        if(direction == Define.Direction.RIGHT)
-            look.x += 1;
-        Util.calcIndex(look,model);
-        movePos.setValue(look.x, look.y);
-        return movePos;
-    }
-
     public boolean isEndLoop(Pos branchBlockPos, Define.Direction direction){
         clearGraphMap();
         checkUnknown.clear();
@@ -63,7 +46,7 @@ public class LoopUnknownChecker {
             }
             graphMap.get(checkPos.y).set(checkPos.x, true);
 
-            tmp = DirectionPosition(pop, Define.Direction.UP,model);
+            tmp = MapUtil.DirectionPosition(pop, Define.Direction.UP,model);
             if(model.our.get(tmp.y).get(tmp.x).type == Define.AIR)
                 count++;
             if((tmp.x == 0 || tmp.y == 0 || tmp.y == model.getRow() - 1|| tmp.x == model.getCol() -1) && model.our.get(tmp.y).get(tmp.x).type == Define.UNKNOWN)
@@ -74,25 +57,25 @@ public class LoopUnknownChecker {
                 return false;
             }
 
-            tmp = DirectionPosition(pop, Define.Direction.UP,model);
+            tmp = MapUtil.DirectionPosition(pop, Define.Direction.UP,model);
             if(model.our.get(tmp.y).get(tmp.x).type == Define.UNKNOWN){
                 Pos pos = posPool.get();
                 pos.setValue(tmp.x,tmp.y);
                 checkUnknown.push(pos);
             }
-            tmp = DirectionPosition(pop, Define.Direction.DOWN,model);
+            tmp = MapUtil.DirectionPosition(pop, Define.Direction.DOWN,model);
             if(model.our.get(tmp.y).get(tmp.x).type == Define.UNKNOWN){
                 Pos pos = posPool.get();
                 pos.setValue(tmp.x,tmp.y);
                 checkUnknown.push(pos);
             }
-            tmp = DirectionPosition(pop, Define.Direction.RIGHT,model);
+            tmp = MapUtil.DirectionPosition(pop, Define.Direction.RIGHT,model);
             if(model.our.get(tmp.y).get(tmp.x).type == Define.UNKNOWN){
                 Pos pos = posPool.get();
                 pos.setValue(tmp.x,tmp.y);
                 checkUnknown.push(pos);
             }
-            tmp = DirectionPosition(pop, Define.Direction.LEFT,model);
+            tmp = MapUtil.DirectionPosition(pop, Define.Direction.LEFT,model);
             if(model.our.get(tmp.y).get(tmp.x).type == Define.UNKNOWN){
                 Pos pos = posPool.get();
                 pos.setValue(tmp.x,tmp.y);

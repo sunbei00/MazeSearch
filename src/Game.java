@@ -1,5 +1,6 @@
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class Game {
     private ArrayList<Pos> addBranchBlockPos = new ArrayList<>();
@@ -12,6 +13,7 @@ public class Game {
     private Pos prevPos = new Pos(); // Temp for move
     private Pos goal = null;
     private BranchBlockGraph branchBlockGraph;
+    private Pool.PosPool posPool = new Pool.PosPool();
 
     private boolean isFindGoal=false;
     private Priority.ScanPriority scanPriority;
@@ -115,7 +117,6 @@ public class Game {
             MapUtil.applyMove(playerPos, prevPos, model);
             MapUtil.checkFinish(playerPos,energy ,model);
             for(int i=0; i < distance; i++){
-                isFindGoal = false;
                 if(useScanWithScanPriority())
                     return;
                 checkIsEndEnergy();
@@ -176,15 +177,116 @@ public class Game {
         MapUtil.lookAround(playerPos, model);
         useScanWithScanPriority();
 
+
         if(isFindGoal){
             isFindGoal = false;
+            Stack<Pos> wallList = new Stack<>();
+            int row = model.getRow();
+            int col = model.getCol();
+            for(int i = 1; i < row-1; i++)
+                for(int j=1; j < col-1; j++)
+                    if(model.our.get(i).get(j).type == Define.WALL){
+                        Pos wallPos = posPool.get();
+                        wallPos.setValue(j, i);
+                        wallList.push(wallPos);
+                    }
+            DestInfo dest = null;
+            boolean isFind = false;
+            while(wallList.size() != 0){
+                Pos wallPos = wallList.pop();
+                model.our.get(wallPos.y).get(wallPos.x).type = Define.AIR;
+                model.our.get(playerPos.y).get(playerPos.x).type = Define.AIR; // for build graph
+
+                branchBlockGraph.clear();
+                branchBlockGraph.checkBranchBlock();
+                for(Pos BranchBlockPos : addBranchBlockPos)
+                    branchBlockGraph.addHashMap(BranchBlockPos);
+                BranchBlock head = branchBlockGraph.buildGraph();
+                Route route = new Route(head, playerPos, branchBlockGraph.branchBlockHashMap);
+                route.SetList();
+                ArrayList<DestInfo> destInfos = route.Dijkstra(branchBlockGraph.branchBlockHashMap.get(playerPos.hashCode()));
+
+                for(DestInfo destInfo : destInfos)
+                    if(destInfo.branchBlock.x == goal.x && destInfo.branchBlock.y == goal.y)
+                        if(destInfo.distance != Integer.MAX_VALUE){
+                            dest = destInfo;
+                            isFind = true;
+                            break;
+                        }
+
+                model.our.get(playerPos.y).get(playerPos.x).type = Define.PLAYER;
+                model.our.get(wallPos.y).get(wallPos.x).type = Define.WALL;
+                posPool.push(wallPos);
+                if(isFind)
+                    break;
+            }
+
+            if(dest != null){
+
+                for (Define.Direction direction : dest.directions) {
+                    int distance = 0;
+                    if(direction == Define.Direction.UP)
+                        distance = branchBlockGraph.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).up.distance - 1;
+                    if(direction == Define.Direction.DOWN)
+                        distance = branchBlockGraph.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).down.distance - 1;
+                    if(direction == Define.Direction.LEFT)
+                        distance = branchBlockGraph.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).left.distance - 1;
+                    if(direction == Define.Direction.RIGHT)
+                        distance = branchBlockGraph.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).right.distance - 1;
+
+                    checkIsEndEnergy();
+                    decreaseEnergy();
+                    increaseMana();
+                    Pos tmp = MapUtil.DirectionPosition(playerPos, direction, model);
+
+                    if(model.our.get(tmp.y).get(tmp.x).type == Define.WALL){
+                        if(!useBreak(new Pos(tmp.x,tmp.y))){
+                            System.out.println("BlockBreak Error");
+                            System.exit(0);
+                        }
+                    }
+                    MapUtil.moveDirection(playerPos, direction, model);
+                    MapUtil.applyMove(playerPos, prevPos, model);
+                    MapUtil.checkFinish(playerPos,energy ,model);
+                    for(int i=0; i < distance; i++){
+                        if(useScanWithScanPriority())
+                            return;
+                        checkIsEndEnergy();
+                        decreaseEnergy();
+                        increaseMana();
+                        boolean isBreak = false;
+                        tmp = MapUtil.DirectionPosition(playerPos, direction, model);
+
+                        if(model.our.get(tmp.y).get(tmp.x).type == Define.WALL){
+                            if(!useBreak(new Pos(tmp.x,tmp.y))){
+                                System.out.println("BlockBreak Error");
+                                System.exit(0);
+                            }
+                            isBreak = true;
+                        }
+
+
+                        if(!isBreak)
+                            MapUtil.moveAround(playerPos, prevPos, model);
+                        else{
+                            Define.Direction direct = MapUtil.getDirection(playerPos, tmp);
+                            MapUtil.moveDirection(playerPos,direct,model);
+                        }
+                        MapUtil.applyMove(playerPos, prevPos, model);
+                        MapUtil.checkFinish(playerPos,energy ,model);
+                    }
+                }
+            } else{
+                calculatePriorityAndMove();
+            }
+
             calculatePriorityAndMove();
+
         }
 
     }
 
     public boolean useScanWithScanPriority(){
-        isFindGoal = false;
         if(isMana()){
             // 스캔 우선 순위 계산
             boolean isEmptyGoal = goal == null? true : false;
@@ -239,14 +341,7 @@ public class Game {
             return false;
 
         this.model.groundTruth.get(pos.y).get(pos.x).type = Define.BREAK; // GroundTruth에 벽을 부순 위치 표시
-        for(Pos p : Define.boundary) { // lookAround 재계산을 위해서 주변 AIR를 제외한 것들을 UNKNOWN으로 변경
-            Pos look = new Pos(this.playerPos.x, this.playerPos.y);
-            look.x += p.x;
-            look.y += p.y;
-            Util.calcIndex(look,model);
-            if(this.model.our.get(look.y).get(look.x).type != Define.AIR)
-                this.model.our.get(look.y).get(look.x).type = Define.UNKNOWN;
-        }
+        this.model.our.get(pos.y).get(pos.x).type = Define.AIR; // GroundTruth에 벽을 부순 위치 표시
         MapUtil.lookAround(playerPos, model);
         this.breakItem = false;
         breakPos = pos;

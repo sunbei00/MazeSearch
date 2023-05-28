@@ -75,7 +75,7 @@ public class MapUtil {
             Util.calcIndex(look,model);
             if (playerPos.x == look.x && playerPos.y == look.y) // 시작점에서 계산을 위해.
                 continue;
-            if (model.our.get(look.y).get(look.x).type == Define.AIR)
+            if (model.our.get(look.y).get(look.x).type == Define.AIR || model.our.get(look.y).get(look.x).type == Define.BREAK)
                 i++;
         }
 
@@ -101,7 +101,7 @@ public class MapUtil {
             look.x += p.x;
             look.y += p.y;
             Util.calcIndex(look,model);
-            if (model.our.get(look.y).get(look.x).type == Define.AIR) {
+            if (model.our.get(look.y).get(look.x).type == Define.AIR || model.our.get(look.y).get(look.x).type == Define.BREAK) {
                 if (look.isEquals(prevPos)) // 이전에 이동한 위치일 시
                     continue;
                 movePos.setValue(look.x, look.y);
@@ -148,4 +148,20 @@ public class MapUtil {
 
         return movePos;
     }
+
+    public static Pos DirectionPosition(Pos playerPos, Define.Direction direction, Model model) {
+        look.setValue(playerPos.x, playerPos.y);
+        if(direction == Define.Direction.UP)
+            look.y += -1;
+        if(direction == Define.Direction.DOWN)
+            look.y += 1;
+        if(direction == Define.Direction.LEFT)
+            look.x += -1;
+        if(direction == Define.Direction.RIGHT)
+            look.x += 1;
+        Util.calcIndex(look,model);
+        movePos.setValue(look.x, look.y);
+        return movePos;
+    }
+
 }
