@@ -39,15 +39,22 @@ public class MapUtil {
         if(playerPos.x == 1 && playerPos.y == 0)
             return false;
         if(playerPos.x == 0 || playerPos.x == model.getCol()-1)
-            if(playerPos.y == 0 || playerPos.y == model.getRow()-1)
-                return true;
+            return true;
+        if(playerPos.y == 0 || playerPos.y == model.getRow()-1)
+            return true;
         return false;
     }
 
-    public static void checkFinish(Pos playerPos, Model model){
+    public static void checkFinish(Pos playerPos, int remainEnergy ,Model model){
         if(isFinish(playerPos,model)){
             // FILE WRITE
             System.out.println("탈출!!");
+            model.setWritePath("result.txt");
+            model.setWritePath("./GroundTruth.bmp");
+            model.ImgWrite(Define.ImgOutput.GroundTruth);
+            model.setWritePath("./Our.bmp");
+            model.ImgWrite(Define.ImgOutput.Our);
+            model.resultWrite(remainEnergy);
             System.exit(0);
         }
     }
@@ -141,5 +148,30 @@ public class MapUtil {
             movePos.setValue(look.x, look.y);
 
         return movePos;
+    }
+
+    public static boolean isDeadEnd(BranchBlock branchBlock, Define.Direction direction, Model model){
+        look.setValue(branchBlock.x, branchBlock.y);
+        Pos tmp = moveDirection(look, direction, model);
+        look.setValue(tmp.x, tmp.y);
+
+        int count = 0;
+        tmp = moveDirection(look, Define.Direction.LEFT, model);
+        if(model.our.get(tmp.y).get(tmp.y).type == Define.WALL)
+            count++;
+        tmp = moveDirection(look, Define.Direction.RIGHT, model);
+        if(model.our.get(tmp.y).get(tmp.y).type == Define.WALL)
+            count++;
+        tmp = moveDirection(look, Define.Direction.UP, model);
+        if(model.our.get(tmp.y).get(tmp.y).type == Define.WALL)
+            count++;
+        tmp = moveDirection(look, Define.Direction.DOWN, model);
+        if(model.our.get(tmp.y).get(tmp.y).type == Define.WALL)
+            count++;
+
+        if(count >= 3)
+            return true;
+
+        return false;
     }
 }

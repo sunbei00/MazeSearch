@@ -82,10 +82,11 @@ public class Model {
             Game game = new Game(this);
 
             //game.useScan(new Define.Pos(10,10));
-            for(test=0;test < 64;test++){ // getRow()*getCol()*2
+            for(test=0;test < 2000;test++){ // getRow()*getCol()*2
                 game.Move();
                 //game.useBreak(new Define.Pos(3,2));
 
+                /*
                  // path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
@@ -99,8 +100,8 @@ public class Model {
                 }
                 setWritePath("./path/Our" + test + ".bmp");
                 ImgWrite(Define.ImgOutput.Our);
+                */
             }
-
 
             // our = groundTruth;
             /*

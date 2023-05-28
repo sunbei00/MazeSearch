@@ -79,7 +79,7 @@ public class Game {
 
         if(priority.maxPriority == Integer.MIN_VALUE){
             // Game Over
-            System.out.println("이동할 수 있는 맵이 미존재");
+            System.out.println("GameOver : 이동할 수 있는 맵이 미존재");
             System.exit(0);
         }
 
@@ -99,21 +99,18 @@ public class Game {
             increaseMana();
             MapUtil.moveDirection(playerPos, direction, model);
             MapUtil.applyMove(playerPos, prevPos, model);
+            MapUtil.checkFinish(playerPos,energy ,model);
             for(int i=0; i < distance; i++){
                 checkIsEndEnergy();
                 decreaseEnergy();
                 increaseMana();
                 MapUtil.moveAround(playerPos, prevPos, model);
                 MapUtil.applyMove(playerPos, prevPos, model);
+                MapUtil.checkFinish(playerPos,energy ,model);
             }
         }
 
         MapUtil.lookAround(playerPos,model);
-        MapUtil.checkFinish(playerPos,model);
-
-        if(model.test == 63){
-            System.out.println("Check");
-        }
 
         Define.Direction direction = MapUtil.getDirection(playerPos, dest);
         if(MapUtil.isAir(playerPos,direction,model)){
@@ -142,11 +139,12 @@ public class Game {
             }
             if(direction == Define.Direction.UNKNOWN) // Error Check
                 System.out.println("direction Unkwon Error");
+            MapUtil.checkFinish(playerPos,energy ,model);
         }
     }
     public void Move(){
         // GAME OVER : 우선순위 계산 할 Branch가 미존재 할 시 (우선순위에서 계산해야 할 듯)
-        MapUtil.checkFinish(playerPos,model);
+        MapUtil.checkFinish(playerPos,energy ,model);
         checkIsEndEnergy();
         decreaseEnergy();
         increaseMana();
