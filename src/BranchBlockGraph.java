@@ -103,6 +103,8 @@ public class BranchBlockGraph {
         link.prevBranchBlock = branchBlockHashMap.get(Util.HashCode(1,0));
         link.prevBranchDirection = Define.Direction.DOWN;
         link.prevBranchBlock.up.exist = false; // 시작 지점 위는 미존재 false
+        link.prevBranchBlock.right.exist = false; // 시작 지점 오른쪽은 미존재 false
+        link.prevBranchBlock.left.exist = false; // 시작 지점 왼쪽은 미존재 false
         linkList.add(link);
 
         while(linkList.size() != 0){

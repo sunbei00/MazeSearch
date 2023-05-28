@@ -79,7 +79,6 @@ public class Game {
         branchBlockGraph.checkBranchBlock();
         for(Pos BranchBlockPos : addBranchBlockPos)
             branchBlockGraph.addHashMap(BranchBlockPos);
-        System.out.println(branchBlockGraph.branchBlockHashMap.size());
         BranchBlock head = branchBlockGraph.buildGraph();
         model.our.get(playerPos.y).get(playerPos.x).type = Define.PLAYER;
 

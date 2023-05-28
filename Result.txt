@@ -1,4 +1,4 @@
-Initial Energy : 4692
-Wasted Energy : 273
-Remain Energy : 4419
-Insert File Name : ./Maze/Maze1.txt
+Initial Energy : 99450
+Wasted Energy : 46432
+Remain Energy : 53018
+Insert File Name : ./Maze/Maze9.txt
