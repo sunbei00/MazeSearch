@@ -63,8 +63,10 @@ public class LoopUnknownChecker {
             }
             graphMap.get(checkPos.y).set(checkPos.x, true);
 
-            tmp = MapUtil.moveDirection(pop, Define.Direction.UP,model);
-            if(tmp.x == pop.x && tmp.y == pop.y)
+            tmp = DirectionPosition(pop, Define.Direction.UP,model);
+            if(model.our.get(tmp.y).get(tmp.x).type == Define.AIR)
+                count++;
+            if((tmp.x == 0 || tmp.y == 0 || tmp.y == model.getRow() - 1|| tmp.x == model.getCol() -1) && model.our.get(tmp.y).get(tmp.x).type == Define.UNKNOWN)
                 count++;
             if(count >=2){
                 while(checkUnknown.size() != 0)
