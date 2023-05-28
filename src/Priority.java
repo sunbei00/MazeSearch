@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -116,7 +117,7 @@ public class Priority {
                 look.x += p.x;
                 look.y += p.y;
                 Util.calcIndex(look,model);
-                if(our.get(look.y).get(look.x).type != Define.UNKNOWN){ //지금까지 스캔한 값
+                if(our.get(look.y).get(look.x).type == Define.UNKNOWN){ //지금까지 스캔한 값
                     unknown_count++;
                 }
             }
@@ -136,35 +137,17 @@ public class Priority {
             // → 골과 가장 가까운 길을 찾고, 해당 길과 가까운 스캔그리드 우선순위 ↑
             //2) keep going
             // → 골 그리드와 인접하면서, 쥐의 현재 위치와 가까운 스캔그리드 우선순위 ↑
+            point.priority = 0;
             point.priority -= distance;
 
             // 직접 가보지 않은 구역으로, unknown 비율이 높은 경우 우선순위 ↑
-            point.priority += 10*Math.sqrt(checkUnknown(point));
+            point.priority += 30*Math.sqrt(checkUnknown(point));
         }
 
         public void createScanGrid(){
             //각 스캔그리드 중심 좌표, 5n*5n 구역만 고려 //최외각만 따로 그리드 생성하는 방식으로 바꾸기!
-
-            //최외각 스캔그리드 중심 좌표 조절
-            int balanceX = 0;
-            int balanceY = 0;
-
-            if(row%5!=0) {
-                balanceY = row % 5;
-            }
-
-            if(col%5!=0) {
-                balanceX = col % 5;
-            }
-
-
             //외곽 스캔그리드
             for (int i = 2; i < row; i += 5) {
-                // 마지막 i에서 +plusY를 하는 로직
-                if(i+5>=row) {
-                    i += balanceY;
-                }
-
                 ScanPoint leftcenter = new ScanPoint(2, i, false, true);
                 scanCenter.add(leftcenter);
                 ScanPoint rightcenter = new ScanPoint(col-3, i, false, true);
@@ -172,19 +155,24 @@ public class Priority {
             }
 
             for (int i = 2; i < col; i += 5) {
-                // 마지막 i에서 +plusX를 하는 로직
-                if(i+5>=col)
-                    i+=balanceX;
-
                 ScanPoint topcenter = new ScanPoint(i, 2, false, true);
-                scanCenter.add(topcenter);
+                if (!scanCenter.contains(topcenter)) {  // ScanCenter에 center가 없는 경우만
+                    scanCenter.add(topcenter);  // ScanCenter에 추가
+                }
                 ScanPoint bottomcenter = new ScanPoint(i, row-3, false, true);
-                scanCenter.add(bottomcenter);
+                if (!scanCenter.contains(bottomcenter)) {  // ScanCenter에 center가 없는 경우만
+                    scanCenter.add(bottomcenter);  // ScanCenter에 추가
+                }
+            }
+
+            ScanPoint outSide = new ScanPoint(col-3, row-3, false, true);
+            if (!scanCenter.contains(outSide)) {  // ScanCenter에 center가 없는 경우만
+                scanCenter.add(outSide);  // ScanCenter에 추가
             }
 
             //내곽 스캔 그리드
-            for (int i = 2; i < row; i += 5) {
-                for (int j = 2; j < col; j += 5) {
+            for (int i = 2; i < col; i += 5) {
+                for (int j = 2; j < row; j += 5) {
                     ScanPoint center = new ScanPoint(i, j, false, false);
                     if (!scanCenter.contains(center)) {  // ScanCenter에 center가 없는 경우만
                         scanCenter.add(center);  // ScanCenter에 추가
@@ -210,12 +198,16 @@ public class Priority {
                         calculatePriority(point, symX, symY);
 
                         //스캔 우선순위 계산
-                        if (maxPriority < point.priority) {
+                        if (maxPriority <= point.priority) {
                             maxPriority = point.priority;
                             scanPoint = point;
                         }
                     }
                 }
+
+                System.out.println(scanPoint.x);
+                System.out.println(scanPoint.y);
+                System.out.println(maxPriority);
 
                 //스캔그리드 방문
                 scanPoint.visited = true;
