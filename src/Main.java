@@ -1,7 +1,7 @@
 
 public class Main {
     public static void main(String[] args) {
-        Model model = new Model("./Maze/Maze5.txt", "./result.bmp");
+        Model model = new Model("./Maze/Maze10.txt", "./result.bmp");
         model.fileRead();
         model.buildOur();
 

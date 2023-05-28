@@ -29,6 +29,12 @@ public class Game {
             // GAME OVER
             // FILE WRITE
             // EXIT
+            model.setWritePath("./GroundTruth.bmp");
+            model.ImgWrite(Define.ImgOutput.GroundTruth);
+            model.setWritePath("./Our.bmp");
+            model.ImgWrite(Define.ImgOutput.Our);
+            model.setWritePath("result.txt");
+            model.resultWrite(getEnergy());
             System.out.println("!isEnergy");
             System.exit(0);
         }
@@ -73,6 +79,7 @@ public class Game {
         branchBlockGraph.checkBranchBlock();
         for(Pos BranchBlockPos : addBranchBlockPos)
             branchBlockGraph.addHashMap(BranchBlockPos);
+        System.out.println(branchBlockGraph.branchBlockHashMap.size());
         BranchBlock head = branchBlockGraph.buildGraph();
         model.our.get(playerPos.y).get(playerPos.x).type = Define.PLAYER;
 

@@ -83,9 +83,10 @@ public class Model {
             //game.useScan(new Define.Pos(10,10));
             for(test=0;test < getRow()*getCol()*2;test++){ // getRow()*getCol()*2
                 game.Move();
+                //System.out.println(game.getEnergy());
                 //game.useBreak(new Define.Pos(3,2));
 
-                /*
+/*
                  // path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
@@ -97,9 +98,9 @@ public class Model {
                         e.getStackTrace();
                     }
                 }
-                 */
                 setWritePath("./path/Our" + test + ".bmp");
                 ImgWrite(Define.ImgOutput.Our);
+*/
             }
 
             // our = groundTruth;

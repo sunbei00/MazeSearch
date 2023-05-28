@@ -21,7 +21,7 @@ public class Priority {
 
         private void updatePriority(DestInfo destInfo, Orientation udlr, double goalDistance, int wall_distance, int destdistance, int x, int y) {
             if (udlr.exist == true && udlr.linkedBranch == null) {
-                udlr.priority = -10 * wall_distance - (10*destdistance) - (30*goalDistance);
+                udlr.priority = -10 * wall_distance - (10*destdistance) - (100*goalDistance);
                 if (udlr.priority > maxPriority) {
                     maxPriority = udlr.priority;
                     destResult = destInfo;
