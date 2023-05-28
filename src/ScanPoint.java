@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 public class ScanPoint {
 
     public int x;
@@ -11,5 +13,18 @@ public class ScanPoint {
         this.y = y;
         this.visited = false;
         this.side = side;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ScanPoint scanPoint = (ScanPoint) o;
+        return x == scanPoint.x && y == scanPoint.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
     }
 }
