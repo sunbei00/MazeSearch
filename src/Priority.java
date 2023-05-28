@@ -103,8 +103,7 @@ public class Priority {
                 //스캔 범위
                 look.x += p.x;
                 look.y += p.y;
-
-
+                Util.calcIndex(look,model);
                 if(our.get(look.y).get(look.x).type != Define.UNKNOWN){ //지금까지 스캔한 값
                     unknown_count++;
                 }
@@ -150,12 +149,13 @@ public class Priority {
             //외곽 스캔그리드
             for (int i = 2; i < row; i += 5) {
                 // 마지막 i에서 +plusY를 하는 로직
-                if(i+5>=row)
+                if(i+5>=row) {
                     i += balanceY;
+                }
 
                 ScanPoint leftcenter = new ScanPoint(2, i, false, true);
                 scanCenter.add(leftcenter);
-                ScanPoint rightcenter = new ScanPoint(col-balanceX, i, false, true);
+                ScanPoint rightcenter = new ScanPoint(col-3, i, false, true);
                 scanCenter.add(rightcenter);
             }
 
@@ -166,7 +166,7 @@ public class Priority {
 
                 ScanPoint topcenter = new ScanPoint(i, 2, false, true);
                 scanCenter.add(topcenter);
-                ScanPoint bottomcenter = new ScanPoint(i, row-balanceY, false, true);
+                ScanPoint bottomcenter = new ScanPoint(i, row-3, false, true);
                 scanCenter.add(bottomcenter);
             }
 
@@ -183,7 +183,7 @@ public class Priority {
 
         //우선순위 스캔 구역 선정
         public ScanPoint HighestPriorityScan() {
-            double maxPriority = Double.MIN_VALUE;
+            double maxPriority = Integer.MIN_VALUE;
             ScanPoint scanPoint = new ScanPoint(-1, -1, false, false);
 
             //골 위치를 모를 경우
@@ -194,7 +194,7 @@ public class Priority {
 
                 for (ScanPoint point : scanCenter) {
                     //미스캔 영역 + 외곽 스캔그리드 탐색
-                    if (!point.visited && scanPoint.side) {
+                    if (!point.visited && point.side) {
                         calculatePriority(point, symX, symY);
 
                         //스캔 우선순위 계산

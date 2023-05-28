@@ -17,7 +17,6 @@ public class ScanPoint {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ScanPoint scanPoint = (ScanPoint) o;
         return x == scanPoint.x && y == scanPoint.y;
