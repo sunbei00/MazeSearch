@@ -45,11 +45,28 @@ public class MapUtil {
         return false;
     }
 
-    public static void checkFinish(Pos playerPos, Pos breakPos, int remainEnergy ,Model model){
+    public static void checkFinish(Pos playerPos, Pos breakPos, Pos goal ,int remainEnergy ,Model model){
         if(isFinish(playerPos,model)){
             // FILE WRITE
+            if(goal == null) {
+                int col = model.getCol();
+                int row = model.getRow();
+                for(int i=0; i<row; i++){
+                    if(model.our.get(i).get(0).type == Define.AIR || model.our.get(i).get(0).type == Define.PLAYER )
+                        goal = new Pos(0, i);
+                    if( model.our.get(i).get(model.getCol()-1).type == Define.AIR || model.our.get(i).get(model.getCol()-1).type == Define.PLAYER)
+                        goal = new Pos(model.getCol()-1, i);
+                }
+                for(int i=0; i<col; i++){
+                    if((model.our.get(0).get(i).type == Define.AIR || model.our.get(0).get(i).type == Define.PLAYER) && i != 1)
+                        goal = new Pos(i, 0);
+                    if( model.our.get(model.getRow()-1).get(i).type == Define.AIR ||  model.our.get(model.getRow()-1).get(i).type == Define.PLAYER)
+                        goal = new Pos(i, model.getRow()-1);
+                }
+            }
+
             System.out.println("탈출!!");
-            model.printImageSet(remainEnergy,playerPos,breakPos);
+            model.printImageSet(remainEnergy,playerPos,breakPos,goal,true);
             System.exit(0);
         }
     }
@@ -132,26 +149,6 @@ public class MapUtil {
         if(look.x == playerPos.x && look.y == playerPos.y) // 시작점을 위해서
             return false;
         if(model.our.get(look.y).get(look.x).type == Define.AIR ||  model.our.get(look.y).get(look.x).type == Define.BREAK)
-            return true;
-        return false;
-    }
-
-    public static boolean isAirAndUnknown(Pos playerPos, Define.Direction direction, Model model){
-        look.setValue(0,0);
-        if(direction == Define.Direction.RIGHT)
-            look.x++;
-        if(direction == Define.Direction.LEFT)
-            look.x--;
-        if(direction == Define.Direction.UP)
-            look.y--;
-        if(direction == Define.Direction.DOWN)
-            look.y++;
-        look.x = playerPos.x + look.x;
-        look.y = playerPos.y + look.y;
-        Util.calcIndex(look,model);
-        if(look.x == playerPos.x && look.y == playerPos.y) // 시작점을 위해서
-            return false;
-        if(model.our.get(look.y).get(look.x).type == Define.AIR ||  model.our.get(look.y).get(look.x).type == Define.BREAK ||  model.our.get(look.y).get(look.x).type == Define.UNKNOWN)
             return true;
         return false;
     }

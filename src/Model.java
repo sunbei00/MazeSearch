@@ -196,7 +196,7 @@ public class Model {
         return this.col;
     }
 
-    public void resultWrite(int remainEnergy){
+    public void resultWrite(int remainEnergy, ArrayList<ArrayList<Boolean>> bestWay){
         try{
             if(this.writePath == null)
                 throw new IOException("Need to set variable 'wrtiePath'");
@@ -207,17 +207,53 @@ public class Model {
             fileWriter.write("Initial Energy : " + initialEnergy + "\n");
             fileWriter.write("Wasted Energy : " + (initialEnergy - remainEnergy) + "\n");
             fileWriter.write("Remain Energy : " + remainEnergy + "\n");
-            fileWriter.write("Insert File Name : " + readPath + "\n");
+            fileWriter.write("Insert File Name : " + readPath + "\n\n");
+
+
+
+            if(bestWay != null){
+                int row = getRow();
+                int col = getCol();
+                for(int i=0; i<row; i++){
+                    for(int j=0; j<col; j++)
+                        if(bestWay.get(i).get(j))
+                            fileWriter.write("1");
+                        else
+                            fileWriter.write(" ");
+                    fileWriter.write("\n");
+                }
+            }
 
             fileWriter.flush();
             fileWriter.close();
+
+            System.out.println();
+            System.out.println("Initial Energy : " + initialEnergy);
+            System.out.println("Wasted Energy : " + (initialEnergy - remainEnergy));
+            System.out.println("Remain Energy : " + remainEnergy);
+            System.out.println("Insert File Name : " + readPath + "\n\n");
+            System.out.println();
+
+            if(bestWay != null){
+                int row = getRow();
+                int col = getCol();
+                for(int i=0; i<row; i++){
+                    for(int j=0; j<col; j++)
+                        if(bestWay.get(i).get(j))
+                            System.out.print("1");
+                        else
+                            System.out.print(" ");
+                    System.out.println();
+                }
+            }
+
         }catch (IOException e){
             e.printStackTrace();
             System.exit(0);
         }
     }
 
-    public void printImageSet(int remainEnergy, Pos playerPos, Pos breakPos){
+    public void printImageSet(int remainEnergy, Pos playerPos, Pos breakPos, Pos goal, boolean isGoal){
         if(playerPos != null)
             our.get(playerPos.y).get(playerPos.x).type = Define.PLAYER;
         if(breakPos != null)
@@ -228,6 +264,10 @@ public class Model {
         setWritePath("./Our.bmp");
         ImgWrite(Define.ImgOutput.Our);
         setWritePath("result.txt");
-        resultWrite(remainEnergy);
+        if(isGoal && goal != null)
+            resultWrite(remainEnergy,resultBestPath.BestWay(goal,this));
+        else
+            resultWrite(remainEnergy,null);
+
     }
 }

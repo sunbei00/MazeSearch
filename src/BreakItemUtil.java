@@ -109,7 +109,7 @@ public class BreakItemUtil {
                 }
                 MapUtil.moveDirection(game.playerPos, direction, model);
                 MapUtil.applyMove(game.playerPos, game.prevPos, model);
-                MapUtil.checkFinish(game.playerPos, game.breakPos, game.getEnergy() ,model);
+                MapUtil.checkFinish(game.playerPos, game.breakPos, goal ,game.getEnergy() ,model);
                 MapUtil.lookAround(game.playerPos, model);
                 for(int i=0; i < distance; i++){
                     game.useScanWithScanPriority();
@@ -150,7 +150,7 @@ public class BreakItemUtil {
                     }
                     MapUtil.applyMove(game.playerPos, game.prevPos, model);
                     MapUtil.lookAround(game.playerPos, model);
-                    MapUtil.checkFinish(game.playerPos, game.breakPos, game.getEnergy() ,model);
+                    MapUtil.checkFinish(game.playerPos, game.breakPos, goal, game.getEnergy() ,model);
                 }
             }
             return true;
