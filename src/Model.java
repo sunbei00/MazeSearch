@@ -86,7 +86,7 @@ public class Model {
                 //System.out.println(game.getEnergy());
                 //game.useBreak(new Define.Pos(3,2));
 
-
+                /*
                  // path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
@@ -114,6 +114,7 @@ public class Model {
                 for(BranchBlock b : bbg.branchBlockHashMap.values()){
                     our.get(b.y).get(b.x).type = Define.AIR;
                 }
+                 */
             }
 
             setWritePath("Result.txt");
