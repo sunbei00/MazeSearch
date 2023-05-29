@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 public class Game {
-    public ArrayList<Pos> addBranchBlockPos = new ArrayList<>();
     private int energy;
     private float mana;
     private boolean breakItem;
@@ -13,8 +12,10 @@ public class Game {
     public Pos prevPos = new Pos(); // Temp for move
     public Pos goal = null;
     public BranchBlockGraph branchBlockGraph;
+    public ArrayList<Pos> addBranchBlockPos = new ArrayList<>();
 
-    private boolean isFindGoal=false;
+    private int usingItemFrequency = 101;
+
     private Priority.ScanPriority scanPriority;
 
     public int getEnergy() {
@@ -87,6 +88,7 @@ public class Game {
         if(priority.maxPriority == Integer.MIN_VALUE){
             // Game Over
             System.out.println("GameOver : 이동할 수 있는 맵이 미존재");
+            model.printImageSet(getEnergy(),playerPos,breakPos);
             System.exit(0);
         }
 
@@ -185,19 +187,12 @@ public class Game {
         useScanWithScanPriority();
 
 
-        /*
-        if(goal != null && isBreakItem() && MapUtil.isBranchBlock(playerPos, model)){
-            if(!BreakItemUtil.isGoodBreak(goal, this, model))
+        if(goal != null && isBreakItem() && (int)Math.floor(100*(double)getEnergy()/(double)(model.getCol()*model.getRow()*2)) != usingItemFrequency){
+            if(!BreakItemUtil.isGoodBreak(goal, this, model)){
+                usingItemFrequency = (int)Math.floor(100*(double)getEnergy()/(double)(model.getCol()*model.getRow()*2));
                 calculatePriorityAndMove();
+            }
         }
-         */
-
-        if(isFindGoal && isBreakItem()){
-            isFindGoal = false;
-            if(!BreakItemUtil.isGoodBreak(goal, this, model))
-                calculatePriorityAndMove();
-        }
-
     }
 
     public boolean useScanWithScanPriority(){
@@ -209,7 +204,6 @@ public class Game {
             useScan(scanPoint.x,scanPoint.y);
             if(isEmptyGoal && goal != null){
                 addBranchBlockPos.add(playerPos);
-                isFindGoal = true;
                 return true;
             }
         }
@@ -249,7 +243,7 @@ public class Game {
             return false;
         if(pos.x <= 0 || pos.x >= this.model.getCol() - 1)  // 양끝의 벽은 부실 수 없음
             return false;
-        if(pos.y <= 0 || pos.x >= this.model.getRow() - 1) // 양끝의 벽은 부실 수 없음
+        if(pos.y <= 0 || pos.y >= this.model.getRow() - 1) // 양끝의 벽은 부실 수 없음
             return false;
         if(this.model.groundTruth.get(pos.y).get(pos.x).type != Define.WALL) // 부시려는 것이 벽이 아닐 경우
             return false;

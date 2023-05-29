@@ -43,7 +43,7 @@ public class Priority {
                 else {
                     double wall_Priority = wallPriorityCalculate(wall_distance);
                     double dest_Priority = dest_distance * dest_distance;
-                    double goal_Priority = goalDistance * goalDistance * 10;
+                    double goal_Priority = goalDistance * goalDistance * 100;
                     udlr.priority = -wall_Priority - dest_Priority - goal_Priority;
                 }
 
@@ -331,9 +331,6 @@ public class Priority {
                         }
                     }
 
-//                    System.out.println(scanPoint.x);
-//                    System.out.println(scanPoint.y);
-//                    System.out.println(maxPriority);
                 }
             }
             //스캔그리드 방문

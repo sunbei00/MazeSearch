@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 public class BreakItemUtil {
+    private static double breakBlockRatio = 0.3;
     private static Pool.PosPool posPool = new Pool.PosPool();
 
     public static boolean isGoodBreak(Pos goal , Game game, Model model){
@@ -14,11 +15,13 @@ public class BreakItemUtil {
         int col = model.getCol();
         for(int i = 1; i < row-1; i++)
             for(int j=1; j < col-1; j++)
-                if(model.our.get(i).get(j).type == Define.WALL){
-                    Pos wallPos = posPool.get();
-                    wallPos.setValue(j, i);
-                    wallList.push(wallPos);
-                }
+                if(model.our.get(i).get(j).type == Define.WALL)
+                    if((double)Math.abs(goal.x-j)/model.getCol() <= breakBlockRatio && (double)Math.abs(goal.y-i)/model.getRow() <= breakBlockRatio){
+                        Pos wallPos = posPool.get();
+                        wallPos.setValue(j, i);
+                        wallList.push(wallPos);
+                    }
+
         DestInfo dest = null;
         boolean isFind = false;
         Pos breakWall = new Pos();
@@ -31,7 +34,7 @@ public class BreakItemUtil {
             game.branchBlockGraph.checkBranchBlock();
             for(Pos BranchBlockPos : game.addBranchBlockPos)
                 game.branchBlockGraph.addHashMap(BranchBlockPos);
-
+            game.branchBlockGraph.addHashMap(game.playerPos);
             if(MapUtil.isAir(wallPos, Define.Direction.UP, model))
                 game.branchBlockGraph.addHashMap(MapUtil.DirectionPosition(wallPos, Define.Direction.UP,model));
             if(MapUtil.isAir(wallPos, Define.Direction.LEFT, model))
@@ -61,9 +64,12 @@ public class BreakItemUtil {
             if(isFind)
                 break;
         }
-        long afterTime = System.currentTimeMillis(); // 코드 실행 후에 시간 받아오기
-        long secDiffTime = (afterTime - beforeTime); //두 시간에 차 계산
-        System.out.println("시간차이(m) : "+secDiffTime);
+        long afterTime = System.currentTimeMillis(); 
+        long secDiffTime = (afterTime - beforeTime); 
+        if(secDiffTime > 1000) // 프로그램 속도가 너무 느려지는 것을 방지하기 위해서 block break rotaio 조정
+            breakBlockRatio = Math.max(0.1, breakBlockRatio - 0.05);
+        if(secDiffTime > 10000)
+            breakBlockRatio = 0.05;
 
         if(dest != null){
             for (Define.Direction direction : dest.directions) {
@@ -84,6 +90,18 @@ public class BreakItemUtil {
 
                 if(model.our.get(tmp.y).get(tmp.x).type == Define.WALL){
                     if(!game.useBreak(new Pos(tmp.x,tmp.y))){
+
+                        model.setWritePath("./Our" + ".bmp");
+                        // brabch block
+                        for(BranchBlock b : game.branchBlockGraph.branchBlockHashMap.values()){
+                            model.our.get(b.y).get(b.x).type = Define.BRANCH_BLOCK;
+                        }
+                        //odel.our.get(game.playerPos.y).get(game.playerPos.x).type = Define.PLAYER;
+                        model.ImgWrite(Define.ImgOutput.Our);
+                        for(BranchBlock b : game.branchBlockGraph.branchBlockHashMap.values()){
+                            model.our.get(b.y).get(b.x).type = Define.AIR;
+                        }
+
                         System.out.println("Break Item Error");
                         System.exit(0);
                     }
