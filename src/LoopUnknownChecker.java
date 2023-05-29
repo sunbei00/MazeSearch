@@ -29,6 +29,10 @@ public class LoopUnknownChecker {
     }
 
     public boolean isEndLoop(Pos branchBlockPos, Define.Direction direction){
+        if(branchBlockPos.x == 0 || branchBlockPos.x == model.getCol() - 1)
+            return false;
+        if(branchBlockPos.y == 0 || branchBlockPos.y == model.getRow() - 1)
+            return false;
         clearGraphMap();
         checkUnknown.clear();
         Pos checkPos = MapUtil.DirectionPosition(branchBlockPos,direction,model);
@@ -100,14 +104,14 @@ public class LoopUnknownChecker {
             }
             posPool.push(pop);
         }
-        /*
         int row = model.getRow();
         int col = model.getCol();
         for(int i=0; i<row; i++)
             for(int j=0; j<col; j++)
-                model.our.get(i).get(j).type = Define.CLOSE;
+                if(graphMap.get(i).get(j) == true)
+                    if(!(i ==0 || j == 0 || i == model.getRow() - 1 || j == model.getCol() - 1))
+                        model.our.get(i).get(j).type = Define.CLOSE;
 
-         */
         return true;
     }
 

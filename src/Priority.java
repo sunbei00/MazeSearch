@@ -250,9 +250,6 @@ public class Priority {
                 //스캔그리드 방문
                 scanPoint.visited = true;
 
-//                System.out.println(scanPoint.x);
-//                System.out.println(scanPoint.y);
-//                System.out.println(maxPriority);
                 return scanPoint;
             }
 

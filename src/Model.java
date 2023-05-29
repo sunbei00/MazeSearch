@@ -36,26 +36,26 @@ public class Model {
                 throw new IOException("Need to set variable 'readPath'");
             FileReader fileReader = new FileReader(this.readPath);
 
-            int count=0;
             int ch;
             this.groundTruth = new ArrayList<ArrayList<Block>>();
-            this.groundTruth.add(count,new ArrayList<Block>()); // 최소 1개의 row가 있다고 가정.
+            this.groundTruth.add(new ArrayList<Block>()); // 최소 1개의 row가 있다고 가정.
             while((ch = fileReader.read()) != -1){
-                if(ch == '\n'){
-                    count++;
-                    this.groundTruth.add(count,new ArrayList<Block>());
-                }
+                if(ch == '\n')
+                    this.groundTruth.add(new ArrayList<Block>());
                 else if(ch == Define.AIR || ch == Define.WALL)
-                    this.groundTruth.get(count).add(new Block(ch));
+                    this.groundTruth.get(groundTruth.size()-1).add(new Block(ch));
                 else if( ch > 32  && ch != 127) // 제어 문자, 빈 문자, 0,1 이외의 값이 들어오면 오류 처리
                     throw new IOException("File is Error(Error Character) : " +  (char)ch);
             }
+            while(groundTruth.get(groundTruth.size()-1).size() == 0)
+                groundTruth.remove(groundTruth.size()-1);
+
             this.row = this.groundTruth.size();
             this.col = this.groundTruth.get(0).size();
 
             for(int i=0;i<this.groundTruth.size();i++)
                 if(this.groundTruth.get(i).size() != col)
-                    throw new IOException("File is Error(Column Error)");
+                    throw new IOException("File is Error(Row Column Error)");
 
             fileReader.close();
         }catch (IOException e){
@@ -84,7 +84,7 @@ public class Model {
                 game.Move();
                 //System.out.println(game.getEnergy());
 
-
+                /*
                  // path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
@@ -112,7 +112,7 @@ public class Model {
                 for(BranchBlock b : bbg.branchBlockHashMap.values()){
                     our.get(b.y).get(b.x).type = Define.AIR;
                 }
-
+                */
 
                 moveFunctionCallCount++;
             }
