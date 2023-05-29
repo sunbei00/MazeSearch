@@ -1,7 +1,12 @@
 
 public class Main {
     public static void main(String[] args) {
-        Model model = new Model("./Maze/Maze19.txt", "./result.bmp");
+        String fileName=  FileChooser.chooseFile();
+        if(fileName == null){
+            System.out.println("파일을 선택해주세요.");
+            System.exit(0);
+        }
+        Model model = new Model(fileName, "./result.bmp");
         model.fileRead();
         model.buildOur();
     }
