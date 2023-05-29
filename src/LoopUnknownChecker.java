@@ -44,7 +44,7 @@ public class LoopUnknownChecker {
                 posPool.push(pop);
                 continue;
             }
-            graphMap.get(checkPos.y).set(checkPos.x, true);
+            graphMap.get(pop.y).set(pop.x, true);
 
             tmp = MapUtil.DirectionPosition(pop, Define.Direction.UP,model);
             if(model.our.get(tmp.y).get(tmp.x).type == Define.AIR)

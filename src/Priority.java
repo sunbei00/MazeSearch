@@ -24,9 +24,11 @@ public class Priority {
         private void updatePriority(DestInfo destInfo, Orientation udlr, Define.Direction direction, double goalDistance, int wall_distance, int destdistance, int x, int y) {
             Pos branchBlockPos = new Pos(destInfo.branchBlock.x, destInfo.branchBlock.y);
             if(udlr.exist == true && udlr.linkedBranch == null){
-//                if(loopUnknownChecker.isEndLoop(branchBlockPos, direction)){
-//                    udlr.priority = Integer.MIN_VALUE;
-//                }
+
+                if(loopUnknownChecker.isEndLoop(branchBlockPos, direction)){
+                    udlr.priority = Integer.MIN_VALUE+1;
+                }
+
                 {
                     udlr.priority = -10 * wall_distance - (10*destdistance) - (60*goalDistance);
                     if (udlr.priority > maxPriority) {
