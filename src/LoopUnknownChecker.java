@@ -31,7 +31,7 @@ public class LoopUnknownChecker {
     public boolean isEndLoop(Pos branchBlockPos, Define.Direction direction){
         clearGraphMap();
         checkUnknown.clear();
-        Pos checkPos = MapUtil.moveDirection(branchBlockPos,direction,model);
+        Pos checkPos = MapUtil.DirectionPosition(branchBlockPos,direction,model);
         Pos head = posPool.get();
         head.setValue(checkPos.x,checkPos.y);
         int count = 0;
@@ -49,8 +49,25 @@ public class LoopUnknownChecker {
             tmp = MapUtil.DirectionPosition(pop, Define.Direction.UP,model);
             if(model.our.get(tmp.y).get(tmp.x).type == Define.AIR)
                 count++;
-            if((tmp.x == 0 || tmp.y == 0 || tmp.y == model.getRow() - 1|| tmp.x == model.getCol() -1) && model.our.get(tmp.y).get(tmp.x).type == Define.UNKNOWN)
+            if((tmp.x == 0 || tmp.y == 0 || tmp.y == model.getRow() - 1 || tmp.x == model.getCol() -1) && model.our.get(tmp.y).get(tmp.x).type == Define.UNKNOWN)
                 count++;
+            tmp = MapUtil.DirectionPosition(pop, Define.Direction.DOWN,model);
+            if(model.our.get(tmp.y).get(tmp.x).type == Define.AIR)
+                count++;
+            if((tmp.x == 0 || tmp.y == 0 || tmp.y == model.getRow() - 1 || tmp.x == model.getCol() -1) && model.our.get(tmp.y).get(tmp.x).type == Define.UNKNOWN)
+                count++;
+            tmp = MapUtil.DirectionPosition(pop, Define.Direction.LEFT,model);
+            if(model.our.get(tmp.y).get(tmp.x).type == Define.AIR)
+                count++;
+            if((tmp.x == 0 || tmp.y == 0 || tmp.y == model.getRow() - 1 || tmp.x == model.getCol() -1) && model.our.get(tmp.y).get(tmp.x).type == Define.UNKNOWN)
+                count++;
+            tmp = MapUtil.DirectionPosition(pop, Define.Direction.RIGHT,model);
+            if(model.our.get(tmp.y).get(tmp.x).type == Define.AIR)
+                count++;
+            if((tmp.x == 0 || tmp.y == 0 || tmp.y == model.getRow() - 1 || tmp.x == model.getCol() -1) && model.our.get(tmp.y).get(tmp.x).type == Define.UNKNOWN)
+                count++;
+
+
             if(count >=2){
                 while(checkUnknown.size() != 0)
                     posPool.push(checkUnknown.pop());
@@ -83,6 +100,14 @@ public class LoopUnknownChecker {
             }
             posPool.push(pop);
         }
+        /*
+        int row = model.getRow();
+        int col = model.getCol();
+        for(int i=0; i<row; i++)
+            for(int j=0; j<col; j++)
+                model.our.get(i).get(j).type = Define.CLOSE;
+
+         */
         return true;
     }
 

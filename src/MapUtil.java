@@ -45,16 +45,11 @@ public class MapUtil {
         return false;
     }
 
-    public static void checkFinish(Pos playerPos, int remainEnergy ,Model model){
+    public static void checkFinish(Pos playerPos, Pos breakPos, int remainEnergy ,Model model){
         if(isFinish(playerPos,model)){
             // FILE WRITE
             System.out.println("탈출!!");
-            model.setWritePath("./GroundTruth.bmp");
-            model.ImgWrite(Define.ImgOutput.GroundTruth);
-            model.setWritePath("./Our.bmp");
-            model.ImgWrite(Define.ImgOutput.Our);
-            model.setWritePath("result.txt");
-            model.resultWrite(remainEnergy);
+            model.printImageSet(remainEnergy,playerPos,breakPos);
             System.exit(0);
         }
     }
@@ -104,7 +99,7 @@ public class MapUtil {
         model.our.get(playerPos.y).get(playerPos.x).type = Define.PLAYER;
     }
     public static Pos moveAround(Pos playerPos, Pos prevPos, Model model) {
-        // Branch Block이 아니라는 가정이 필수!! 잊지말기!!
+        // AIR라는 가정이 필수!! 잊지말기!!
         movePos.setValue(playerPos.x, playerPos.y);
         for (Pos p : Define.moveBoundary) {
             look.setValue(playerPos.x, playerPos.y);

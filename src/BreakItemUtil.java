@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -20,6 +21,7 @@ public class BreakItemUtil {
                 }
         DestInfo dest = null;
         boolean isFind = false;
+        Pos breakWall = new Pos();
         while(wallList.size() != 0){
             Pos wallPos = wallList.pop();
             model.our.get(wallPos.y).get(wallPos.x).type = Define.AIR;
@@ -29,6 +31,16 @@ public class BreakItemUtil {
             game.branchBlockGraph.checkBranchBlock();
             for(Pos BranchBlockPos : game.addBranchBlockPos)
                 game.branchBlockGraph.addHashMap(BranchBlockPos);
+
+            if(MapUtil.isAir(wallPos, Define.Direction.UP, model))
+                game.branchBlockGraph.addHashMap(MapUtil.DirectionPosition(wallPos, Define.Direction.UP,model));
+            if(MapUtil.isAir(wallPos, Define.Direction.LEFT, model))
+                game.branchBlockGraph.addHashMap(MapUtil.DirectionPosition(wallPos, Define.Direction.LEFT,model));
+            if(MapUtil.isAir(wallPos, Define.Direction.DOWN, model))
+                game.branchBlockGraph.addHashMap(MapUtil.DirectionPosition(wallPos, Define.Direction.DOWN,model));
+            if(MapUtil.isAir(wallPos, Define.Direction.RIGHT, model))
+                game.branchBlockGraph.addHashMap(MapUtil.DirectionPosition(wallPos, Define.Direction.RIGHT,model));
+
             BranchBlock head = game.branchBlockGraph.buildGraph();
             Route route = new Route(head, game.playerPos, game.branchBlockGraph.branchBlockHashMap);
             route.SetList();
@@ -39,6 +51,7 @@ public class BreakItemUtil {
                     if(destInfo.distance != Integer.MAX_VALUE){
                         dest = destInfo;
                         isFind = true;
+                        breakWall.setValue(wallPos.x, wallPos.y);
                         break;
                     }
 
@@ -51,8 +64,8 @@ public class BreakItemUtil {
         long afterTime = System.currentTimeMillis(); // 코드 실행 후에 시간 받아오기
         long secDiffTime = (afterTime - beforeTime); //두 시간에 차 계산
         System.out.println("시간차이(m) : "+secDiffTime);
-        if(dest != null){
 
+        if(dest != null){
             for (Define.Direction direction : dest.directions) {
                 int distance = 0;
                 if(direction == Define.Direction.UP)
@@ -77,7 +90,7 @@ public class BreakItemUtil {
                 }
                 MapUtil.moveDirection(game.playerPos, direction, model);
                 MapUtil.applyMove(game.playerPos, game.prevPos, model);
-                MapUtil.checkFinish(game.playerPos,game.getEnergy() ,model);
+                MapUtil.checkFinish(game.playerPos, game.breakPos, game.getEnergy() ,model);
                 MapUtil.lookAround(game.playerPos, model);
                 for(int i=0; i < distance; i++){
                     game.useScanWithScanPriority();
@@ -85,28 +98,44 @@ public class BreakItemUtil {
                     game.decreaseEnergy();
                     game.increaseMana();
                     boolean isBreak = false;
-                    tmp = MapUtil.moveAround(game.playerPos, game.prevPos, model);
 
-                    if(model.our.get(tmp.y).get(tmp.x).type == Define.WALL){
-                        if(!game.useBreak(new Pos(tmp.x,tmp.y))){
+
+                    Pos looking = null;
+                    if(game.isBreakItem()){
+                        for(Pos move : Define.moveBoundary){
+                            looking = posPool.get();
+                            looking.setValue(game.playerPos.x + move.x , game.playerPos.y + move.y);
+                            tmp = MapUtil.moveDirection(looking, MapUtil.getDirection(looking, breakWall), model);
+                            if(tmp.x == breakWall.x && tmp.y == breakWall.y)
+                                break;
+
+                            posPool.push(looking);
+                            looking = null;
+                        }
+                    }
+
+
+                    if(looking != null && model.our.get(looking.y).get(looking.x).type == Define.WALL ){
+                        if(!game.useBreak(new Pos(looking.x,looking.y))){
                             System.out.println("Break Item Error");
                             System.exit(0);
                         }
                         isBreak = true;
                     }
+
                     if(!isBreak)
                         MapUtil.moveAround(game.playerPos, game.prevPos, model);
                     else{
-                        Define.Direction direct = MapUtil.getDirection(game.playerPos, tmp);
+                        Define.Direction direct = MapUtil.getDirection(game.playerPos, looking);
                         MapUtil.moveDirection(game.playerPos,direct,model);
                     }
                     MapUtil.applyMove(game.playerPos, game.prevPos, model);
                     MapUtil.lookAround(game.playerPos, model);
-                    MapUtil.checkFinish(game.playerPos, game.getEnergy() ,model);
+                    MapUtil.checkFinish(game.playerPos, game.breakPos, game.getEnergy() ,model);
                 }
             }
             return true;
-        }else{
+        } else {
             return false;
         }
     }

@@ -65,7 +65,6 @@ public class Model {
     }
 
 
-    public int test = 0; // tmp
     public void buildOur(){
         try{
             if(readPath == null)
@@ -80,13 +79,12 @@ public class Model {
 
             Game game = new Game(this);
 
-            //game.useScan(new Define.Pos(10,10));
-            for(test=0;test < getRow()*getCol()*2;test++){ // getRow()*getCol()*2
+            int moveFunctionCallCount=0;
+            while(true){
                 game.Move();
                 //System.out.println(game.getEnergy());
-                //game.useBreak(new Define.Pos(3,2));
 
-                /*
+
                  // path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
@@ -98,7 +96,7 @@ public class Model {
                         e.getStackTrace();
                     }
                 }
-                setWritePath("./path/Our" + test + ".bmp");
+                setWritePath("./path/Our" + moveFunctionCallCount + ".bmp");
                 // brabch block
                 BranchBlockGraph bbg = new BranchBlockGraph(this);
                 bbg.clear();
@@ -114,11 +112,10 @@ public class Model {
                 for(BranchBlock b : bbg.branchBlockHashMap.values()){
                     our.get(b.y).get(b.x).type = Define.AIR;
                 }
-                 */
-            }
 
-            setWritePath("Result.txt");
-            resultWrite(game.getEnergy());
+
+                moveFunctionCallCount++;
+            }
 
         }catch (IOException e){
             e.printStackTrace();
@@ -176,6 +173,9 @@ public class Model {
                             img.setRGB(count%col,count/col,0x00660066); // purple
                             break;
                         case Define.BREAK:
+                            img.setRGB(count%col,count/col,0x0033ffff); // sky
+                            break;
+                        case Define.CLOSE:
                             img.setRGB(count%col,count/col,0x00ff00cc); // pink
                             break;
                     }
@@ -215,5 +215,19 @@ public class Model {
             e.printStackTrace();
             System.exit(0);
         }
+    }
+
+    public void printImageSet(int remainEnergy, Pos playerPos, Pos breakPos){
+        if(playerPos != null)
+            our.get(playerPos.y).get(playerPos.x).type = Define.PLAYER;
+        if(breakPos != null)
+            our.get(breakPos.y).get(breakPos.x).type = Define.BREAK;
+
+        setWritePath("./GroundTruth.bmp");
+        ImgWrite(Define.ImgOutput.GroundTruth);
+        setWritePath("./Our.bmp");
+        ImgWrite(Define.ImgOutput.Our);
+        setWritePath("result.txt");
+        resultWrite(remainEnergy);
     }
 }

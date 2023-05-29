@@ -10,6 +10,7 @@ public class Define {
     static final int PLAYER = '4';      // (our Map에서) 플레이어 위치
     static final int GOAL = '5';        // (our Map에서) Move 또는 Scan 시 발견하는 목적지
     static final int BREAK = '6';       // (GroundTruth에서) BreakItem으로 부신 위치
+    static final int CLOSE = '7';       // (GroundTruth에서) BreakItem으로 부신 위치
 
 
     enum ImgOutput{

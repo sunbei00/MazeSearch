@@ -27,16 +27,8 @@ public class Game {
     }
     public void checkIsEndEnergy(){
         if(!isEnergy()){
-            // GAME OVER
-            // FILE WRITE
-            // EXIT
-            model.setWritePath("./GroundTruth.bmp");
-            model.ImgWrite(Define.ImgOutput.GroundTruth);
-            model.setWritePath("./Our.bmp");
-            model.ImgWrite(Define.ImgOutput.Our);
-            model.setWritePath("result.txt");
-            model.resultWrite(getEnergy());
-            System.out.println("!isEnergy");
+            model.printImageSet(getEnergy(),playerPos,breakPos);
+            System.out.println("GameOver : !isEnergy");
             System.exit(0);
         }
     }
@@ -121,7 +113,7 @@ public class Game {
             increaseMana();
             MapUtil.moveDirection(playerPos, direction, model);
             MapUtil.applyMove(playerPos, prevPos, model);
-            MapUtil.checkFinish(playerPos,energy ,model);
+            MapUtil.checkFinish(playerPos, breakPos,energy ,model);
             MapUtil.lookAround(playerPos, model);
             for(int i=0; i < distance; i++){
                 if(useScanWithScanPriority())
@@ -131,7 +123,7 @@ public class Game {
                 increaseMana();
                 MapUtil.moveAround(playerPos, prevPos, model);
                 MapUtil.applyMove(playerPos, prevPos, model);
-                MapUtil.checkFinish(playerPos,energy ,model);
+                MapUtil.checkFinish(playerPos, breakPos ,energy ,model);
                 MapUtil.lookAround(playerPos, model);
             }
         }
@@ -166,12 +158,12 @@ public class Game {
             if(direction == Define.Direction.UNKNOWN) // Error Check
                 System.out.println("direction Unkwon Error");
             MapUtil.lookAround(playerPos, model);
-            MapUtil.checkFinish(playerPos,energy ,model);
+            MapUtil.checkFinish(playerPos ,breakPos ,energy ,model);
         }
     }
     public void Move(){
         // GAME OVER : 우선순위 계산 할 Branch가 미존재 할 시 (우선순위에서 계산해야 할 듯)
-        MapUtil.checkFinish(playerPos,energy ,model);
+        MapUtil.checkFinish(playerPos, breakPos ,energy ,model);
         Pos goalPos = MapUtil.CheckFindGoal(goal, model); // goal 변수에 넣어주기위해서 목적지를 찾았는지 확인하는 과정
         if(goalPos != null){
             goal = goalPos;
@@ -262,6 +254,7 @@ public class Game {
         if(this.model.groundTruth.get(pos.y).get(pos.x).type != Define.WALL) // 부시려는 것이 벽이 아닐 경우
             return false;
 
+        System.out.println("Using Break Item");
         this.model.groundTruth.get(pos.y).get(pos.x).type = Define.BREAK; // GroundTruth에 벽을 부순 위치 표시
         this.model.our.get(pos.y).get(pos.x).type = Define.AIR; // GroundTruth에 벽을 부순 위치 표시
         MapUtil.lookAround(playerPos, model);

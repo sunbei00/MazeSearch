@@ -10,6 +10,7 @@ public class Priority {
         public DestInfo destResult;
         public double maxPriority; //minValue, 게임 end
         public Pos goal;
+        static int branchCount = 0;
         public LoopUnknownChecker loopUnknownChecker;
 
         public BranchPriority(Model model, ArrayList<DestInfo> destInfos, Pos goal) {
@@ -21,22 +22,36 @@ public class Priority {
 
         public void setGoal(Pos goal) {this.goal = goal;}
 
-        private void updatePriority(DestInfo destInfo, Orientation udlr, Define.Direction direction, double goalDistance, int wall_distance, int destdistance, int x, int y) {
+        //벽 우선순위 계산
+        //arctan 함수 사용하여, 우선순위 부여
+        private double wallPriorityCalculate(double input){
+            double rangeStart = 1;
+            double rangeEnd = Math.max(model.getRow(), model.getCol()) - 1;
+
+            double mid = (rangeStart + rangeEnd) / 2;
+            double range = rangeEnd - mid;
+            double a = 0.001 * range;
+
+            return 100 * Math.atan(a * input-mid);
+        }
+
+        private void updatePriority(DestInfo destInfo, Orientation udlr, Define.Direction direction, double goalDistance, int wall_distance, int dest_distance, int x, int y) {
             Pos branchBlockPos = new Pos(destInfo.branchBlock.x, destInfo.branchBlock.y);
             if(udlr.exist == true && udlr.linkedBranch == null){
-
-                if(loopUnknownChecker.isEndLoop(branchBlockPos, direction)){
-                    udlr.priority = Integer.MIN_VALUE+1;
+                if(loopUnknownChecker.isEndLoop(branchBlockPos, direction))
+                    udlr.priority = Integer.MIN_VALUE + 1;
+                else {
+                    double wall_Priority = wallPriorityCalculate(wall_distance);
+                    double dest_Priority = dest_distance * dest_distance;
+                    double goal_Priority = goalDistance * goalDistance * 10;
+                    udlr.priority = -wall_Priority - dest_Priority - goal_Priority;
                 }
 
-                {
-                    udlr.priority = -10 * wall_distance - (10*destdistance) - (60*goalDistance);
-                    if (udlr.priority > maxPriority) {
-                        maxPriority = udlr.priority;
-                        destResult = destInfo;
-                        location.x = x;
-                        location.y = y;
-                    }
+                if (udlr.priority > maxPriority) {
+                    maxPriority = udlr.priority;
+                    destResult = destInfo;
+                    location.x = x;
+                    location.y = y;
                 }
             }
         }
@@ -119,55 +134,17 @@ public class Priority {
             this.back = back;
         }
 
-
-        //이미 스캔한 범위일 경우, unknown 비율 체크
-        public int checkUnknown(ScanPoint point) {
-            int unknown_count = 0;
-            for (Pos p : Define.sacnBoundary) {
-                Pos look = new Pos(point.x, point.y); //스캔할 지역의 중심좌표, new 생성
-
-                //스캔 범위
-                look.x += p.x;
-                look.y += p.y;
-                Util.calcIndex(look,model);
-                if(our.get(look.y).get(look.x).type == Define.UNKNOWN){ //지금까지 스캔한 값
-                    unknown_count++;
-                }
-            }
-
-            return unknown_count;
-        }
-
-        public void calculatePriority(ScanPoint point, int symX, int symY) {
-            int xDiff = point.x - symX;
-            int yDiff = point.y - symY;
-
-            double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-
-            //골 x → 대칭점과 가까울수록 외곽 스캔그리드 우선순위 ↑
-            //골 o
-            //1) 지난 경로 back
-            // → 골과 가장 가까운 길을 찾고, 해당 길과 가까운 스캔그리드 우선순위 ↑
-            //2) keep going
-            // → 골 그리드와 인접하면서, 쥐의 현재 위치와 가까운 스캔그리드 우선순위 ↑
-            point.priority = 0;
-            point.priority -= distance;
-
-            // 직접 가보지 않은 구역으로, unknown 비율이 높은 경우 우선순위 ↑
-            point.priority += 10*Math.sqrt(checkUnknown(point));
-        }
-
         public void createScanGrid(){
             //각 스캔그리드 중심 좌표, 5n*5n 구역만 고려 //최외각만 따로 그리드 생성하는 방식으로 바꾸기!
             //외곽 스캔그리드
-            for (int i = 2; i < row; i += 5) {
+            for (int i = 2; i <= row-3; i += 5) {
                 ScanPoint leftcenter = new ScanPoint(2, i, false, true);
                 scanCenter.add(leftcenter);
                 ScanPoint rightcenter = new ScanPoint(col-3, i, false, true);
                 scanCenter.add(rightcenter);
             }
 
-            for (int i = 2; i < col; i += 5) {
+            for (int i = 2; i <= col-3; i += 5) {
                 ScanPoint topcenter = new ScanPoint(i, 2, false, true);
                 if (!scanCenter.contains(topcenter)) {  // ScanCenter에 center가 없는 경우만
                     scanCenter.add(topcenter);  // ScanCenter에 추가
@@ -194,6 +171,58 @@ public class Priority {
             }
         }
 
+        //이미 스캔한 범위일 경우, unknown 비율 체크
+        public int checkUnknown(ScanPoint point) {
+            int unknown_count = 0;
+            for (Pos p : Define.sacnBoundary) {
+                Pos look = new Pos(point.x, point.y); //스캔할 지역의 중심좌표, new 생성
+
+                //스캔 범위
+                look.x += p.x;
+                look.y += p.y;
+                Util.calcIndex(look,model);
+                if(our.get(look.y).get(look.x).type == Define.UNKNOWN){ //지금까지 스캔한 값
+                    unknown_count++;
+                }
+            }
+
+            return unknown_count;
+        }
+        private double unknownPriorityCalculate(double input){
+            double rangeStart = 0;
+            double rangeEnd = 25;
+
+            double mid = (rangeStart + rangeEnd + 1) / 2;
+            double range = rangeEnd - mid;
+            double a = 0.001 * range;
+
+            return 100 * Math.atan(a * input-mid);
+        }
+
+        public void calculatePriority(ScanPoint point, int symX, int symY) {
+            int xDiff = point.x - symX;
+            int yDiff = point.y - symY;
+
+            double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+
+            //골 x → 대칭점과 가까울수록 외곽 스캔그리드 우선순위 ↑
+            //골 o
+            //1) 지난 경로 back
+            // → 골과 가장 가까운 길을 찾고, 해당 길과 가까운 스캔그리드 우선순위 ↑
+            //2) keep going
+            // → 골 그리드와 인접하면서, 쥐의 현재 위치와 가까운 스캔그리드 우선순위 ↑
+            point.priority = 0;
+
+            double unknown_Priority = unknownPriorityCalculate(checkUnknown(point));
+            double distance_Priority = distance*distance;
+//            point.priority -= distance;
+//
+//            // 직접 가보지 않은 구역으로, unknown 비율이 높은 경우 우선순위 ↑
+//            point.priority += 20*Math.sqrt(checkUnknown(point));
+
+            point.priority = unknown_Priority - distance_Priority;
+
+        }
         //우선순위 스캔 구역 선정
         public ScanPoint HighestPriorityScan() {
             double maxPriority = Integer.MIN_VALUE;
@@ -221,6 +250,9 @@ public class Priority {
                 //스캔그리드 방문
                 scanPoint.visited = true;
 
+//                System.out.println(scanPoint.x);
+//                System.out.println(scanPoint.y);
+//                System.out.println(maxPriority);
                 return scanPoint;
             }
 
@@ -290,7 +322,6 @@ public class Priority {
                     goalNearCenter.addAll(tempPoints);
 
                     //골 스캔그리드와 인접한 그리드 중 (현재위치, unknown) 정보에 따라 우선순위 부여
-
                     for (ScanPoint point : goalNearCenter) {
                         if (!point.visited) {
                             calculatePriority(point, location.x, location.y);
@@ -302,6 +333,10 @@ public class Priority {
                             }
                         }
                     }
+
+//                    System.out.println(scanPoint.x);
+//                    System.out.println(scanPoint.y);
+//                    System.out.println(maxPriority);
                 }
             }
             //스캔그리드 방문
