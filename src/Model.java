@@ -86,7 +86,7 @@ public class Model {
                 //System.out.println(game.getEnergy());
                 //game.useBreak(new Define.Pos(3,2));
 
-/*
+
                  // path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
@@ -99,24 +99,22 @@ public class Model {
                     }
                 }
                 setWritePath("./path/Our" + test + ".bmp");
+                // brabch block
+                BranchBlockGraph bbg = new BranchBlockGraph(this);
+                bbg.clear();
+                our.get(game.playerPos.y).get(game.playerPos.x).type = Define.AIR; // for build graph
+                bbg.checkBranchBlock();
+                bbg.buildGraph();
+                our.get(game.playerPos.y).get(game.playerPos.x).type = Define.PLAYER; // for build graph
+
+                for(BranchBlock b : bbg.branchBlockHashMap.values()){
+                    our.get(b.y).get(b.x).type = Define.BRANCH_BLOCK;
+                }
                 ImgWrite(Define.ImgOutput.Our);
-*/
+                for(BranchBlock b : bbg.branchBlockHashMap.values()){
+                    our.get(b.y).get(b.x).type = Define.AIR;
+                }
             }
-
-            // our = groundTruth;
-/*
-            BranchBlockGraph bbg = new BranchBlockGraph(this);
-            bbg.clear();
-            our.get(game.playerPos.y).get(game.playerPos.x).type = Define.AIR; // for build graph
-            bbg.checkBranchBlock();
-            bbg.buildGraph();
-            our.get(game.playerPos.y).get(game.playerPos.x).type = Define.PLAYER; // for build graph
-
-            for(BranchBlock b : bbg.branchBlockHashMap.values()){
-                our.get(b.y).get(b.x).type = Define.BRANCH_BLOCK;
-            }
-*/
-
 
             setWritePath("Result.txt");
             resultWrite(game.getEnergy());

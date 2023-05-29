@@ -36,14 +36,16 @@ public class BranchBlockGraph {
     public void clear(){
         clearGraphMap();
         branchBlockHashMap.clear();
+        linkList.clear();
+        posPairList.clear();
     }
 
     public void addHashMap(Pos pos){
         if(!branchBlockHashMap.containsKey(pos.hashCode()))
-            branchBlockHashMap.put(pos.hashCode(),new BranchBlock(pos.x,pos.y));
+            branchBlockHashMap.put(pos.hashCode(), new BranchBlock(pos.x, pos.y));
     }
     public void checkBranchBlock(){
-        clearGraphMap();
+        clear();
         AbstractMap.SimpleEntry<Pos, Pos> pos = posPairPool.get(); // key : prev, value : current
         pos.getKey().setValue(1,0);
         pos.getValue().setValue(1,0);
@@ -52,7 +54,7 @@ public class BranchBlockGraph {
 
         while(posPairList.size() != 0){
             AbstractMap.SimpleEntry<Pos,Pos> pop = posPairList.pop();
-            if(graphMap.get(pop.getValue().y).get(pop.getValue().x).up){
+            if(graphMap.get(pop.getValue().y).get(pop.getValue().x).up){ // up 방향 boolean으로 체크
                 // 순환구조로 인해.
                 posPairPool.push(pop);
                 continue;

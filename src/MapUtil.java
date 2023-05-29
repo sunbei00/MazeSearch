@@ -2,7 +2,7 @@ public class MapUtil {
     private static Pos look = new Pos(); // optimize for memory (Temp)
     private static Pos movePos = new Pos(); // optimize for memory (Temp)
 
-    public static void lookAround(Pos playerPos, Model model){
+    public static void lookAround(Pos playerPos ,Model model){
         for(Pos p : Define.boundary){
             look.setValue(playerPos.x, playerPos.y);
             look.x += p.x;
@@ -12,9 +12,9 @@ public class MapUtil {
                 continue;
             if(model.groundTruth.get(look.y).get(look.x).type == Define.WALL) // 벽 표시
                 model.our.get(look.y).get(look.x).type = Define.WALL;
-            if(model.groundTruth.get(look.y).get(look.x).type == Define.AIR || model.groundTruth.get(look.y).get(look.x).type == Define.BREAK){
+            if(model.groundTruth.get(look.y).get(look.x).type == Define.AIR || model.groundTruth.get(look.y).get(look.x).type == Define.BREAK)
                 model.our.get(look.y).get(look.x).type = Define.AIR;
-            }
+
         }
     }
 
@@ -65,8 +65,11 @@ public class MapUtil {
             i)   n > 3   : Branch Block으로 만들어줘야 함. -> true 반환
             ii)  n == 2  : 이동할 수 있음                 -> false 반환
             iii) n = 1   : 막 다른 골목                   -> true 반환
+            iiii) scan에 의한 변수로인해 오류 처리 : 주변에 block이 2개이고, 길이 1개이고, unknown 1개일 때 true 반환.
         */
-        int i = 0;
+        int countWall = 0;
+        int countUnknwon = 0;
+        int countAir = 0;
         for (Pos p : Define.moveBoundary) {
             look.setValue(playerPos.x, playerPos.y);
             look.x += p.x;
@@ -75,11 +78,18 @@ public class MapUtil {
             Util.calcIndex(look,model);
             if (playerPos.x == look.x && playerPos.y == look.y) // 시작점에서 계산을 위해.
                 continue;
-            if (model.our.get(look.y).get(look.x).type == Define.AIR || model.our.get(look.y).get(look.x).type == Define.BREAK)
-                i++;
+            if (model.our.get(look.y).get(look.x).type == Define.AIR || model.our.get(look.y).get(look.x).type == Define.BREAK )
+                countAir++;
+            if (model.our.get(look.y).get(look.x).type == Define.UNKNOWN){
+                countUnknwon++;
+            }
+            if (model.our.get(look.y).get(look.x).type == Define.WALL)
+                countWall++;
         }
 
-        switch (i){
+        if(countWall == 1 && countAir == 2 && countUnknwon == 1)
+            return true;
+        switch (countAir){
             case 2:
                 return false;
             default:
@@ -131,6 +141,26 @@ public class MapUtil {
         return false;
     }
 
+    public static boolean isAirAndUnknown(Pos playerPos, Define.Direction direction, Model model){
+        look.setValue(0,0);
+        if(direction == Define.Direction.RIGHT)
+            look.x++;
+        if(direction == Define.Direction.LEFT)
+            look.x--;
+        if(direction == Define.Direction.UP)
+            look.y--;
+        if(direction == Define.Direction.DOWN)
+            look.y++;
+        look.x = playerPos.x + look.x;
+        look.y = playerPos.y + look.y;
+        Util.calcIndex(look,model);
+        if(look.x == playerPos.x && look.y == playerPos.y) // 시작점을 위해서
+            return false;
+        if(model.our.get(look.y).get(look.x).type == Define.AIR ||  model.our.get(look.y).get(look.x).type == Define.BREAK ||  model.our.get(look.y).get(look.x).type == Define.UNKNOWN)
+            return true;
+        return false;
+    }
+
     public static Pos moveDirection(Pos playerPos, Define.Direction direction, Model model) {
         // direction 방향의 Block이 아니라는 가정이 필수!! 잊지말기!!
         look.setValue(playerPos.x, playerPos.y);
@@ -162,6 +192,26 @@ public class MapUtil {
         Util.calcIndex(look,model);
         movePos.setValue(look.x, look.y);
         return movePos;
+    }
+
+    public static Pos CheckFindGoal(Pos goal, Model model){
+        if(goal != null)
+            return null;
+        int col = model.getCol();
+        int row = model.getRow();
+        for(int i=0; i<row; i++){
+            if(model.our.get(i).get(0).type == Define.AIR )
+                goal = new Pos(0, i);
+            if( model.our.get(i).get(model.getCol()-1).type == Define.AIR)
+                goal = new Pos(model.getCol()-1, i);
+        }
+        for(int i=0; i<col; i++){
+            if(model.our.get(0).get(i).type == Define.AIR && i != 1)
+                goal = new Pos(i, 0);
+            if( model.our.get(model.getRow()-1).get(i).type == Define.AIR)
+                goal = new Pos(i, model.getRow()-1);
+        }
+        return goal;
     }
 
 }

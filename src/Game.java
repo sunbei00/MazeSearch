@@ -99,7 +99,14 @@ public class Game {
             System.exit(0);
         }
 
-        for (Define.Direction direction : priority.destResult.directions) {
+        ArrayList<Define.Direction> Directions = priority.destResult.directions;
+
+        if(goal != null)
+            for(DestInfo destInfo : destInfos)
+                if(goal.x == destInfo.branchBlock.x && goal.y == destInfo.branchBlock.y)
+                    Directions = destInfo.directions;
+
+        for (Define.Direction direction : Directions) {
             int distance = 0;
             if(direction == Define.Direction.UP)
                 distance = branchBlockGraph.branchBlockHashMap.get(Util.HashCode(playerPos.x,playerPos.y)).up.distance - 1;
@@ -116,6 +123,7 @@ public class Game {
             MapUtil.moveDirection(playerPos, direction, model);
             MapUtil.applyMove(playerPos, prevPos, model);
             MapUtil.checkFinish(playerPos,energy ,model);
+            MapUtil.lookAround(playerPos, model);
             for(int i=0; i < distance; i++){
                 if(useScanWithScanPriority())
                     return;
@@ -125,6 +133,7 @@ public class Game {
                 MapUtil.moveAround(playerPos, prevPos, model);
                 MapUtil.applyMove(playerPos, prevPos, model);
                 MapUtil.checkFinish(playerPos,energy ,model);
+                MapUtil.lookAround(playerPos, model);
             }
         }
 
@@ -157,12 +166,17 @@ public class Game {
             }
             if(direction == Define.Direction.UNKNOWN) // Error Check
                 System.out.println("direction Unkwon Error");
+            MapUtil.lookAround(playerPos, model);
             MapUtil.checkFinish(playerPos,energy ,model);
         }
     }
     public void Move(){
         // GAME OVER : 우선순위 계산 할 Branch가 미존재 할 시 (우선순위에서 계산해야 할 듯)
         MapUtil.checkFinish(playerPos,energy ,model);
+        Pos goalPos = MapUtil.CheckFindGoal(goal, model); // goal 변수에 넣어주기위해서 목적지를 찾았는지 확인하는 과정
+        if(goalPos != null)
+            goal = goalPos;
+
         checkIsEndEnergy();
         decreaseEnergy();
         increaseMana();
@@ -241,13 +255,14 @@ public class Game {
 
                     if(model.our.get(tmp.y).get(tmp.x).type == Define.WALL){
                         if(!useBreak(new Pos(tmp.x,tmp.y))){
-                            System.out.println("BlockBreak Error");
+                            System.out.println("Break Item Error");
                             System.exit(0);
                         }
                     }
                     MapUtil.moveDirection(playerPos, direction, model);
                     MapUtil.applyMove(playerPos, prevPos, model);
                     MapUtil.checkFinish(playerPos,energy ,model);
+                    MapUtil.lookAround(playerPos, model);
                     for(int i=0; i < distance; i++){
                         if(useScanWithScanPriority())
                             return;
@@ -255,17 +270,15 @@ public class Game {
                         decreaseEnergy();
                         increaseMana();
                         boolean isBreak = false;
-                        tmp = MapUtil.DirectionPosition(playerPos, direction, model);
+                        tmp = MapUtil.moveAround(playerPos, prevPos, model);
 
                         if(model.our.get(tmp.y).get(tmp.x).type == Define.WALL){
                             if(!useBreak(new Pos(tmp.x,tmp.y))){
-                                System.out.println("BlockBreak Error");
+                                System.out.println("Break Item Error");
                                 System.exit(0);
                             }
                             isBreak = true;
                         }
-
-
                         if(!isBreak)
                             MapUtil.moveAround(playerPos, prevPos, model);
                         else{
@@ -273,15 +286,13 @@ public class Game {
                             MapUtil.moveDirection(playerPos,direct,model);
                         }
                         MapUtil.applyMove(playerPos, prevPos, model);
+                        MapUtil.lookAround(playerPos, model);
                         MapUtil.checkFinish(playerPos,energy ,model);
                     }
                 }
-            } else{
+            } else {
                 calculatePriorityAndMove();
             }
-
-            calculatePriorityAndMove();
-
         }
 
     }
