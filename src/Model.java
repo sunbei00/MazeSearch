@@ -82,7 +82,7 @@ public class Model {
             int moveFunctionCallCount=0;
             while(true){
                 game.Move();
-                //System.out.println(game.getEnergy());
+                System.out.println(game.getEnergy());
 
                 /*
                  // path 사진으로 출력

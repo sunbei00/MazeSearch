@@ -9,6 +9,7 @@ public class BreakItemUtil {
     public static boolean isGoodBreak(Pos goal , Game game, Model model){
         long beforeTime = System.currentTimeMillis();
         // goal 찾았다는 가정이 들어감.
+        System.out.println("BreakItem 사용 여부 판단 중..");
 
         Stack<Pos> wallList = new Stack<>();
         int row = model.getRow();

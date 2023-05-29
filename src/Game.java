@@ -15,6 +15,7 @@ public class Game {
     public ArrayList<Pos> addBranchBlockPos = new ArrayList<>();
 
     private int usingItemFrequency = 101;
+    private int checkEnd = 70;
 
     private Priority.ScanPriority scanPriority;
 
@@ -64,6 +65,8 @@ public class Game {
         branchBlockGraph = new BranchBlockGraph(model);
         scanPriority = new Priority.ScanPriority(model, playerPos, model.our, goal, null, false);
         scanPriority.createScanGrid();
+        if(model.our.get(1).get(1).type == Define.WALL)
+            useBreak(new Pos(1,1));
     }
 
     private void calculatePriorityAndMove(){
@@ -191,6 +194,15 @@ public class Game {
             if(!BreakItemUtil.isGoodBreak(goal, this, model)){
                 usingItemFrequency = (int)Math.floor(100*(double)getEnergy()/(double)(model.getCol()*model.getRow()*2));
                 calculatePriorityAndMove();
+            }
+        }
+        if( (int)Math.floor(100*(double)getEnergy()/(double)(model.getCol()*model.getRow()*2)) <= checkEnd  && (int)Math.floor(100*(double)getEnergy()/(double)(model.getCol()*model.getRow()*2)) != checkEnd){
+            checkEnd = (int)Math.floor(100*(double)getEnergy()/(double)(model.getCol()*model.getRow()*2));
+            if(MapUtil.cantFindOut(model)){
+                // Game Over
+                System.out.println("GameOver : 이동할 수 있는 맵이 미존재");
+                model.printImageSet(getEnergy(),playerPos,breakPos);
+                System.exit(0);
             }
         }
     }

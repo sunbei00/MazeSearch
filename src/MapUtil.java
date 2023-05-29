@@ -209,4 +209,14 @@ public class MapUtil {
         return goal;
     }
 
+    public static boolean cantFindOut(Model model){
+        int col = model.getCol();
+        int row = model.getRow();
+        for(int i = 0; i<row; i++)
+            for(int j = 0; j<col;j++)
+                if(model.our.get(i).get(j).type == Define.UNKNOWN)
+                    return false;
+        return true;
+    }
+
 }
