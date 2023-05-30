@@ -208,13 +208,13 @@ public class Priority {
             //골과 현재 경로 사이의 거리에 따라 distance_Priority 계수 k 조정
             double k = 1;
 
-            if(goal!=null) {
-                int maxDiff = Math.max(xDiff, yDiff);
-                maxDiff += 5;
-                int minDiff = Math.min(xDiff, yDiff);
-                double maxDistance = Math.sqrt(maxDiff * maxDiff + minDiff * minDiff);
-                k = 150 / (maxDistance*maxDistance);
-            }
+//            if(goal!=null) {
+//                int maxDiff = Math.max(xDiff, yDiff);
+//                maxDiff += 5;
+//                int minDiff = Math.min(xDiff, yDiff);
+//                double maxDistance = Math.sqrt(maxDiff * maxDiff + minDiff * minDiff);
+//                k = 150 / (maxDistance*maxDistance);
+//            }
 
             //골 x → 대칭점과 가까울수록 외곽 스캔그리드 우선순위 ↑
             //골 o
@@ -240,7 +240,7 @@ public class Priority {
             ScanPoint scanPoint = new ScanPoint(-1, -1, false, false);
 
             //골 위치를 모를 경우
-            if (goal == null) {
+//            if (goal == null) {
                 scanCounter++;
                 //현재 위치를 기준으로 대칭점 구하기
                 int symX = col - location.x;
@@ -262,93 +262,54 @@ public class Priority {
                 scanPoint.visited = true;
 
                 return scanPoint;
-            }
+//            }
 
-            //골 위치 파악
-            else {
-                //지난 경로로 돌아가는 경우
-                //→ 골과 가장 가까운 길을 찾고, 해당 길과 가까운 스캔그리드를 높은 우선순위 부여
-                if (back) {
-                    //골과 가까운 길 찾기
-                    int minMapX = 0;
-                    int minMapY = 0;
-                    double minDistance = Double.MAX_VALUE;
-
-                    //시간 오래 소요
-                    for (int i = 0; i < row; ++i) {
-                        for (int j = 0; j < col; ++j) {
-                            //길인 경우
-                            if (our.get(i).get(j).type == Define.AIR) {
-                                double distance = Math.sqrt(Math.pow(goal.x - i, 2) + Math.pow(goal.y - j, 2));
-                                if (minDistance > distance) {
-                                    minMapX = i;
-                                    minMapY = j;
-                                }
-                            }
-                        }
-                    }
-
-                    //골과 가까운 길과 스캔그리드와의 우선순위 계산을 통해 스캔 구역 선정
-                    for (ScanPoint point : scanCenter) {
-                        //미스캔 영역
-                        if (!point.visited) {
-                            calculatePriority(point, minMapX, minMapY);
-
-                            //스캔 우선순위 계산
-                            if (maxPriority < point.priority) {
-                                maxPriority = point.priority;
-                                scanPoint = point;
-                            }
-                        }
-                    }
-                }
-
-                //계속 앞으로 탐색
-                //→ 골 스캔그리드와 인접한 그리드를 찾고, 현재 쥐의 위치를 고려하여 스캔그리드 선정
-                else {
-                    ArrayList<ScanPoint> tempPoints = new ArrayList<>();
-                    //골 스캔그리드와 인접한 그리드 찾기
-                    for (ScanPoint point : scanCenter) {
-                        if (point.visited == false) {
-                            //goalNearCenter의 그리드와 인접한 스캔그리드 add
-
-                            for(ScanPoint near : goalNearCenter){
-                                int goalDiffX = point.x - near.x;
-                                int goalDiffY = point.y - near.y;
-
-                                double goalDistance = Math.sqrt(goalDiffX * goalDiffX + goalDiffY * goalDiffY);
-
-                                // 현재 점의 거리가 최소 거리와 같다면 리스트에 추가
-                                if (goalDistance < 7.0) {
-                                    if (!tempPoints.contains(point)) {  // ScanCenter에 center가 없는 경우만
-                                        tempPoints.add(point);  // ScanCenter에 추가
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    goalNearCenter.addAll(tempPoints);
-
-                    //골 스캔그리드와 인접한 그리드 중 (현재위치, unknown) 정보에 따라 우선순위 부여
-                    for (ScanPoint point : goalNearCenter) {
-                        if (!point.visited) {
-                            calculatePriority(point, location.x, location.y);
-
-                            //스캔 우선순위 계산
-                            if (maxPriority < point.priority) {
-                                maxPriority = point.priority;
-                                scanPoint = point;
-                            }
-                        }
-                    }
-
-                }
-            }
-            //스캔그리드 방문
-            scanPoint.visited = true;
-            goalNearCenter.removeIf(p->!p.visited);
-
-            return scanPoint;
+//            //골 위치 파악
+//            else {
+//                //계속 앞으로 탐색
+//                //→ 골 스캔그리드와 인접한 그리드를 찾고, 현재 쥐의 위치를 고려하여 스캔그리드 선정
+//                ArrayList<ScanPoint> tempPoints = new ArrayList<>();
+//
+//                //골 스캔그리드와 인접한 그리드 찾기
+//                for (ScanPoint point : scanCenter) {
+//                    if (point.visited == false) {
+//                        //goalNearCenter의 그리드와 인접한 스캔그리드 add
+//
+//                        for(ScanPoint near : goalNearCenter){
+//                            int goalDiffX = point.x - near.x;
+//                            int goalDiffY = point.y - near.y;
+//
+//                            double goalDistance = Math.sqrt(goalDiffX * goalDiffX + goalDiffY * goalDiffY);
+//
+//                            // 현재 점의 거리가 최소 거리와 같다면 리스트에 추가
+//                            if (goalDistance < 7.0) {
+//                                if (!tempPoints.contains(point)) {  // ScanCenter에 center가 없는 경우만
+//                                    tempPoints.add(point);  // ScanCenter에 추가
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//                goalNearCenter.addAll(tempPoints);
+//
+//                //골 스캔그리드와 인접한 그리드 중 (현재위치, unknown) 정보에 따라 우선순위 부여
+//                for (ScanPoint point : goalNearCenter) {
+//                    if (!point.visited) {
+//                        calculatePriority(point, goal.x, goal.y);
+//
+//                        //스캔 우선순위 계산
+//                        if (maxPriority < point.priority) {
+//                            maxPriority = point.priority;
+//                            scanPoint = point;
+//                        }
+//                    }
+//                }
+//            }
+//            //스캔그리드 방문
+//            scanPoint.visited = true;
+//            goalNearCenter.removeIf(p->!p.visited);
+//
+//            return scanPoint;
         }
     }
 }
