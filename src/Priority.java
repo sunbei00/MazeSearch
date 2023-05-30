@@ -10,7 +10,6 @@ public class Priority {
         public DestInfo destResult;
         public double maxPriority; //minValue, 게임 end
         public Pos goal;
-        static int branchCount = 0;
         public LoopUnknownChecker loopUnknownChecker;
 
         public BranchPriority(Model model, ArrayList<DestInfo> destInfos, Pos goal) {
@@ -101,13 +100,11 @@ public class Priority {
         //쥐의 현재 위치, 대칭점 계산
         public Pos location;
 
-        int row = 0;
-        int col = 0;
-
         public Pos goal;
         public Pos goalGrid;
+        int row;
+        int col;
         boolean back;
-        int scanCounter=0;
 
         //현재 쥐의 위치와, 알고있는 Map 정보
         public ScanPriority(Model model, Pos location, ArrayList<ArrayList<Block>> our, Pos goal, Pos goalGrid, boolean back){
@@ -137,38 +134,6 @@ public class Priority {
         public void createScanGrid(){
             //각 스캔그리드 중심 좌표, 5n*5n 구역만 고려 //최외각만 따로 그리드 생성하는 방식으로 바꾸기!
             //외곽 스캔그리드
-//            for (int i = 2; i <= row-3; i += 5) {
-//                ScanPoint leftcenter = new ScanPoint(2, i, false);
-//                scanCenter.add(leftcenter);
-//                ScanPoint rightcenter = new ScanPoint(col-3, i, false);
-//                scanCenter.add(rightcenter);
-//            }
-//
-//            for (int i = 2; i <= col-3; i += 5) {
-//                ScanPoint topcenter = new ScanPoint(i, 2, false);
-//                if (!scanCenter.contains(topcenter)) {  // ScanCenter에 center가 없는 경우만
-//                    scanCenter.add(topcenter);  // ScanCenter에 추가
-//                }
-//                ScanPoint bottomcenter = new ScanPoint(i, row-3, false);
-//                if (!scanCenter.contains(bottomcenter)) {  // ScanCenter에 center가 없는 경우만
-//                    scanCenter.add(bottomcenter);  // ScanCenter에 추가
-//                }
-//            }
-//
-//            ScanPoint outSide = new ScanPoint(col-3, row-3, false);
-//            if (!scanCenter.contains(outSide)) {  // ScanCenter에 center가 없는 경우만
-//                scanCenter.add(outSide);  // ScanCenter에 추가
-//            }
-//
-//            //내곽 스캔 그리드
-//            for (int i = 2; i < col; i += 5) {
-//                for (int j = 2; j < row; j += 5) {
-//                    ScanPoint center = new ScanPoint(i, j, false);
-//                    if (!scanCenter.contains(center)) {  // ScanCenter에 center가 없는 경우만
-//                        scanCenter.add(center);  // ScanCenter에 추가
-//                    }
-//                }
-//            }
 
             for(int i=2;i<=col-3;i+=5){
                 for(int j=2;j<=row-3;j+=5){
@@ -224,9 +189,8 @@ public class Priority {
             double mid = (rangeStart + rangeEnd + 1) / 2;
             double range = rangeEnd - rangeStart;
             double a = 10 / range;
-            double k = 100 * Math.atan(0.4 * 12);
-            double z = 100 * Math.atan(a * (input-mid));
-            return z;
+
+            return 100 * Math.atan(a * (input-mid));
         }
 
         public void calculatePriority(ScanPoint point, int symX, int symY, int pointX, int pointY) {
@@ -263,13 +227,9 @@ public class Priority {
             double maxPriority = Integer.MIN_VALUE;
             ScanPoint scanPoint = new ScanPoint(-1, -1, false);
 
-            scanCounter++;
             //현재 위치를 기준으로 대칭점 구하기
             int symX = col - location.x;
             int symY = row - location.y;
-
-            System.out.println(symX);
-            System.out.println(symY);
 
             for (ScanPoint point : scanCenter) {
                 //미스캔 영역 + 외곽 스캔그리드 탐색
@@ -285,9 +245,6 @@ public class Priority {
             }
             //스캔그리드 방문
             scanPoint.visited = true;
-
-            System.out.println("x" + scanPoint.x);
-            System.out.println("y" + scanPoint.y);
 
             return scanPoint;
         }
