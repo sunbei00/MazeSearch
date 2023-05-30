@@ -82,9 +82,10 @@ public class Model {
             int moveFunctionCallCount=0;
             while(true){
                 game.Move();
-                System.out.println(game.getEnergy());
+                //System.out.println(game.getEnergy());
 
-                /*
+
+
                  // path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
@@ -112,7 +113,10 @@ public class Model {
                 for(BranchBlock b : bbg.branchBlockHashMap.values()){
                     our.get(b.y).get(b.x).type = Define.AIR;
                 }
-                */
+
+
+
+
 
                 moveFunctionCallCount++;
             }
