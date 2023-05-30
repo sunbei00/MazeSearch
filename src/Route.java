@@ -5,36 +5,22 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 /*
-다익스트라 알고리즘을 이용하여 최적의 경로를 구하는 알고리즘
+Setlist : 브랜치가 저장되어있는 해쉬맵을 받아, 해쉬맵에 저장되어 있는 브랜치 블록들을 List Arraylist에 저장
+Dijkstra :  현재위치의 브랜치 블록을 받아, 거리를 0으로 설정하고 나머지 브랜치 블록들은 MAX_int값으로 저장
+            거리에 대한 우선순위 큐를 선언해 현재위치 브랜치블록을 넣고 각 상하좌우에 연결된 브랜치 블록이 있는지 탐색
+            만약 어느 한 방향에 연결된 브랜치 블록이 있고 거리 배열에 저장된 거리보다 거리가 짧다면,
+            해당 브랜치블록의 거리배열을 업데이트하고 방향에 맞는 경로 추가와 우선순위 큐에 브랜치 블록 추가
 
-입력값 : 브랜치 블록 해쉬맵 키세트
-출력값 : 브랜치 블록 타입 어레이 리스트
 
-1. 해쉬맴 키값 세트를 받아 첫번째 브랜치블록(시작점)을 브랜치 리스트에 추가
-2. 이후 브랜치블록의 상,하,좌,우 값에 링크드 브랜치가 있는지 확인
-3. 있을경우 브랜치 리스트에 추가
-4. 링크드 브랜치가 없을때까지(상하좌우 모두 null인 경우) 반복
-5. 브랜치 리스트를 기반으로 2차원 배열 그래프 시트 생성
-6. 그래프 시트에 각 브랜치별 거리 입력
-7. 완성된 그래프 시트를 기반으로 다익스트라 알고리즘 계산
-8. 시작 브랜치에서 각 브랜치까지의 거리 계산
-9. DestInfo 클래스로 값 전달하여 우선순위 연산
-10. 가장 우선순위가 높은 브랜치 인덱스 리턴
-11. 현재 브랜치에서 리턴받은 브랜치까지 경로를 리스트에 저장 -> 열거형으로 상,하,좌,우 이동방향을 리스트에 저장
-12. 경로 리스트 리턴
 */
 public class Route {
 
     public ArrayList<ArrayList<Define.Direction>> routeTable = null;
     public ArrayList<DestInfo> BBList = null;
     public ArrayList<BranchBlock> List = null;
-    public ArrayList<BranchBlock> After = null;
-    public ArrayList<ArrayList<Integer>> Graph = null;
     public Pos pos = null;
     public BranchBlock firstBranch = null;
     public HashMap<Integer, BranchBlock> branchBlockHashMap;
-
-    public Model model;
 
     // 생성자 : 해쉬맵과 현제 pos값을 인자로 받음
     public Route(BranchBlock branchBlock, Pos pos, HashMap<Integer, BranchBlock> branchBlockHashMap ) {
@@ -45,16 +31,10 @@ public class Route {
         this.BBList = new ArrayList<DestInfo>();
         this.branchBlockHashMap = branchBlockHashMap;
     }
-
-    public Route(Pos pos) {
-        this.pos = pos;
-    }
-
     // 브랜치 블록 리스트 생성
     public void SetList() {
         List.clear();
-        for (BranchBlock b : branchBlockHashMap.values())
-            List.add(b);
+        for (BranchBlock b : branchBlockHashMap.values()) List.add(b);
     }
     /*
      * 다익스트라 알고리즘 핵심 키워드 : 방문여부, 거리
@@ -86,75 +66,70 @@ public class Route {
             now.directions = new ArrayList<Define.Direction>();
             now.directions.addAll(routeTable.get(List.indexOf(nowBranch)));
 
-
             //방문 여부 확인
-            if(check[List.indexOf(nowBranch)]) continue;
+            if (check[List.indexOf(nowBranch)]) continue;
             check[List.indexOf(nowBranch)] = true;
 
-
             //각각의 4방향의 linked branch 여부 확인 후, 경로의 길이를 비교한 뒤 더 짧은 경로가 있다면 업데이트
-            if(nowBranch.up.linkedBranch != null && dis[List.indexOf(nowBranch.up.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.up.distance) {
+            if (nowBranch.up.linkedBranch != null && dis[List.indexOf(nowBranch.up.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.up.distance) {
                 dis[List.indexOf(nowBranch.up.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.up.distance;
-                if(now.directions.isEmpty()) route.clear();
-                else {
-                    route.clear();
-                    for (int i = 0; i < now.directions.size(); i++)
-                        route.add(i, now.directions.get(i));
-                }
+                route.clear();
+                if (!now.directions.isEmpty()) route.addAll(now.directions);
                 route.add(Define.Direction.UP);
-                for(int i = 0; i < route.size(); i++) {
-                    routeTable.get(List.indexOf(nowBranch.up.linkedBranch)).add(i, route.get(i));
-                }
+                routeTable.get(List.indexOf(nowBranch.up.linkedBranch)).addAll(route);
+
                 pq.offer(new DestInfo(nowBranch.up.linkedBranch, dis[List.indexOf(nowBranch.up.linkedBranch)]));
             }
-            if(nowBranch.down.linkedBranch != null && dis[List.indexOf(nowBranch.down.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.down.distance) {
+
+            if (nowBranch.down.linkedBranch != null && dis[List.indexOf(nowBranch.down.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.down.distance) {
                 dis[List.indexOf(nowBranch.down.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.down.distance;
-                if(now.directions.isEmpty()) route.clear();
-                else {
-                    route.clear();
-                    for (int i = 0; i < now.directions.size(); i++)
-                        route.add(i, now.directions.get(i));
-                }
+                route.clear();
+                if (!now.directions.isEmpty()) route.addAll(now.directions);
                 route.add(Define.Direction.DOWN);
-                for(int i = 0; i < route.size(); i++) {
-                    routeTable.get(List.indexOf(nowBranch.down.linkedBranch)).add(i, route.get(i));
-                }
+                routeTable.get(List.indexOf(nowBranch.down.linkedBranch)).addAll(route);
+
                 pq.offer(new DestInfo(nowBranch.down.linkedBranch, dis[List.indexOf(nowBranch.down.linkedBranch)]));
             }
-            if(nowBranch.left.linkedBranch != null && dis[List.indexOf(nowBranch.left.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.left.distance) {
+            if (nowBranch.left.linkedBranch != null && dis[List.indexOf(nowBranch.left.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.left.distance) {
                 dis[List.indexOf(nowBranch.left.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.left.distance;
-                if(now.directions.isEmpty()) route.clear();
-                else {
-                    route.clear();
-                    for (int i = 0; i < now.directions.size(); i++)
-                        route.add(i, now.directions.get(i));
-                }
+                route.clear();
+                if (!now.directions.isEmpty()) route.addAll(now.directions);
                 route.add(Define.Direction.LEFT);
-                for(int i = 0; i < route.size(); i++) {
-                    routeTable.get(List.indexOf(nowBranch.left.linkedBranch)).add(i, route.get(i));
-                }
+                routeTable.get(List.indexOf(nowBranch.left.linkedBranch)).addAll(route);
+
                 pq.offer(new DestInfo(nowBranch.left.linkedBranch, dis[List.indexOf(nowBranch.left.linkedBranch)]));
             }
-            if(nowBranch.right.linkedBranch != null && dis[List.indexOf(nowBranch.right.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.right.distance) {
+            if (nowBranch.right.linkedBranch != null && dis[List.indexOf(nowBranch.right.linkedBranch)] > dis[List.indexOf(nowBranch)] + nowBranch.right.distance) {
                 dis[List.indexOf(nowBranch.right.linkedBranch)] = dis[List.indexOf(nowBranch)] + nowBranch.right.distance;
-                if(now.directions.isEmpty()) route.clear();
-                else {
-                    route.clear();
-                    for (int i = 0; i < now.directions.size(); i++)
-                        route.add(i, now.directions.get(i));
-                }
+                route.clear();
+                if (!now.directions.isEmpty()) route.addAll(now.directions);
                 route.add(Define.Direction.RIGHT);
-                for(int i = 0; i < route.size(); i++) {
-                    routeTable.get(List.indexOf(nowBranch.right.linkedBranch)).add(i, route.get(i));
-                }
+                routeTable.get(List.indexOf(nowBranch.right.linkedBranch)).addAll(route);
 
                 pq.offer(new DestInfo(nowBranch.right.linkedBranch, dis[List.indexOf(nowBranch.right.linkedBranch)]));
             }
         }
         //리스트에 각 브랜치와 최소길이를 add
         for(int i = 0; i < dis.length; i++) {
-            BBList.add(new DestInfo(List.get(i), dis[i],routeTable.get(i)));
+            boolean isNew = true;
+            if(List.get(i).up.exist && List.get(i).up.linkedBranch == null && isNew) {
+                BBList.add(new DestInfo(List.get(i), dis[i],routeTable.get(i)));
+                isNew = false;
+            }
+            if(List.get(i).down.exist && List.get(i).down.linkedBranch == null && isNew) {
+                BBList.add(new DestInfo(List.get(i), dis[i],routeTable.get(i)));
+                isNew = false;
+            }
+            if(List.get(i).left.exist && List.get(i).left.linkedBranch == null && isNew) {
+                BBList.add(new DestInfo(List.get(i), dis[i],routeTable.get(i)));
+                isNew = false;
+            }
+            if(List.get(i).right.exist && List.get(i).right.linkedBranch == null && isNew) {
+                BBList.add(new DestInfo(List.get(i), dis[i],routeTable.get(i)));
+                isNew = false;
+            }
         }
+        System.out.println(BBList.size());
         return BBList;
     }
 }
