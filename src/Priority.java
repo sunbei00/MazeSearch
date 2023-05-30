@@ -29,8 +29,8 @@ public class Priority {
             double rangeEnd = Math.max(model.getRow(), model.getCol()) - 1;
 
             double mid = (rangeStart + rangeEnd) / 2;
-            double range = rangeEnd - mid;
-            double a = 0.001 * range;
+            double range = rangeEnd - rangeStart;
+            double a = 10 / range;
 
             return 100 * Math.atan(a * input-mid);
         }
@@ -193,8 +193,8 @@ public class Priority {
             double rangeEnd = 25;
 
             double mid = (rangeStart + rangeEnd + 1) / 2;
-            double range = rangeEnd - mid;
-            double a = 0.001 * range;
+            double range = rangeEnd - rangeStart;
+            double a = 10 / range;
 
             return 100 * Math.atan(a * input-mid);
         }
@@ -202,8 +202,19 @@ public class Priority {
         public void calculatePriority(ScanPoint point, int symX, int symY) {
             int xDiff = point.x - symX;
             int yDiff = point.y - symY;
-
             double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+
+            //골 o
+            //골과 현재 경로 사이의 거리에 따라 distance_Priority 계수 k 조정
+            double k = 1;
+
+            if(goal!=null) {
+                int maxDiff = Math.max(xDiff, yDiff);
+                maxDiff += 5;
+                int minDiff = Math.min(xDiff, yDiff);
+                double maxDistance = Math.sqrt(maxDiff * maxDiff + minDiff * minDiff);
+                k = 150 / (maxDistance*maxDistance);
+            }
 
             //골 x → 대칭점과 가까울수록 외곽 스캔그리드 우선순위 ↑
             //골 o
@@ -214,7 +225,7 @@ public class Priority {
             point.priority = 0;
 
             double unknown_Priority = unknownPriorityCalculate(checkUnknown(point));
-            double distance_Priority = distance*distance;
+            double distance_Priority = k * (distance*distance);
 //            point.priority -= distance;
 //
 //            // 직접 가보지 않은 구역으로, unknown 비율이 높은 경우 우선순위 ↑
@@ -308,7 +319,7 @@ public class Priority {
                                 double goalDistance = Math.sqrt(goalDiffX * goalDiffX + goalDiffY * goalDiffY);
 
                                 // 현재 점의 거리가 최소 거리와 같다면 리스트에 추가
-                                if (goalDistance <= 5.0) {
+                                if (goalDistance < 7.0) {
                                     if (!tempPoints.contains(point)) {  // ScanCenter에 center가 없는 경우만
                                         tempPoints.add(point);  // ScanCenter에 추가
                                     }
