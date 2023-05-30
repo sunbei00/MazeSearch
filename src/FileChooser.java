@@ -1,11 +1,19 @@
-import javax.swing.JFileChooser;
+import javax.swing.*;
+import java.io.File;
 
 public class FileChooser {
-    private static JFileChooser fileComponent = new JFileChooser();
+
     public static String chooseFile(){
-        if(fileComponent.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
-            return fileComponent.getSelectedFile().toString();
+
+        JFileChooser fileChooser = new JFileChooser();
+        JDialog dialog = new JDialog();
+
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+        int result = fileChooser.showOpenDialog(dialog);
+        if (result == JFileChooser.APPROVE_OPTION)
+            return fileChooser.getSelectedFile().toString();
         else
             return null;
+
     }
 }
