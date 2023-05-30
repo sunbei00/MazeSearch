@@ -129,7 +129,6 @@ public class Route {
                 isNew = false;
             }
         }
-        System.out.println(BBList.size());
         return BBList;
     }
 }
