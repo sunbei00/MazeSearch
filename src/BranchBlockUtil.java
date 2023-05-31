@@ -1,7 +1,9 @@
 public class BranchBlockUtil {
 
+    // 메모리 최적화를 위해 임시로 사용하는 변수
     private static Pos look = new Pos();
 
+    // 이전 branch block 위치와 현재 branch block을 연결하는 함수
     public static void linkBranchBlock(BranchBlock branchBlock, BranchBlock prevBranchBlock, int distance, Pos playerPos, Pos prevPos, Define.Direction prevBranchDirection, Model model){
         Define.Direction direction = MapUtil.getDirection(playerPos,prevPos);
         if(direction == Define.Direction.LEFT){

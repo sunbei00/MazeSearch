@@ -2,10 +2,16 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 public class LoopUnknownChecker {
+    // 이미 밝혀진 맵에서 벽으로 둘러싸여 있으면 해당 지역은 이동할 필요가 없기 때문에 이동 안하는 공간으로 바꿈
 
     private Model model;
+
+    // 해당 위치에 이동해본 적 있는지 판단하기 위해 사용
     private ArrayList<ArrayList<Boolean>> graphMap = new ArrayList<ArrayList<Boolean>>();
+
+    // Unknown으로 DFS 진행하기 위한 stack
     private Stack<Pos> checkUnknown = new Stack<>();
+    // 메모리 최적화를 위한 Pool 사용
     private Pool.PosPool posPool = new Pool.PosPool();
 
 
@@ -28,6 +34,7 @@ public class LoopUnknownChecker {
                 graphMap.get(i).set(j, false);
     }
 
+    // Unknown으로만 이동하는 쥐를 만들어서 이동할 수 있는 곳이 벽으로 둘려싸여 있으면 실제 쥐는 이동할 필요 없다고 판단
     public boolean isEndLoop(Pos branchBlockPos, Define.Direction direction){
         if(branchBlockPos.x == 0 || branchBlockPos.x == model.getCol() - 1)
             return false;

@@ -2,6 +2,7 @@ public class MapUtil {
     private static Pos look = new Pos(); // optimize for memory (Temp)
     private static Pos movePos = new Pos(); // optimize for memory (Temp)
 
+    // 플레이어 위치 주변 3x3 사이즈를 보이게 만들음.
     public static void lookAround(Pos playerPos ,Model model){
         for(Pos p : Define.boundary){
             look.setValue(playerPos.x, playerPos.y);
@@ -18,6 +19,7 @@ public class MapUtil {
         }
     }
 
+    // 이전 위치와 현재 위치를 통해서 현재 플레이어 위치 기준으로 이전 위치가 어디방향인지 판단
     public static Define.Direction getDirection(Pos playerPos, Pos prevPos){
         // player pos 기준
         int x_sub = playerPos.x - prevPos.x;
@@ -35,6 +37,7 @@ public class MapUtil {
         return Define.Direction.UNKNOWN;
     }
 
+    // 목적지에 도달했는지 판단하는 함수
     public static boolean isFinish(Pos playerPos, Model model){
         if(playerPos.x == 1 && playerPos.y == 0)
             return false;
@@ -45,9 +48,9 @@ public class MapUtil {
         return false;
     }
 
+    // 현재 위치가 목적지인지 판단하는 함수
     public static void checkFinish(Pos playerPos, Pos breakPos, Pos goal ,int remainEnergy ,Model model){
         if(isFinish(playerPos,model)){
-            // FILE WRITE
             if(goal == null) {
                 int col = model.getCol();
                 int row = model.getRow();
@@ -71,6 +74,7 @@ public class MapUtil {
         }
     }
 
+    // 해당 위치가 Branch Block인지 판단하는 함수
     public static boolean isBranchBlock(Pos playerPos, Model model){
          /*
             경우의 수 ( n := 길의 수 )
@@ -109,14 +113,18 @@ public class MapUtil {
         }
     }
 
+    // moveAround나 moveDirection 함수로 위치를 반환하지만 our 맵으로 실제로 이동하지는 않음.
+    // 위의 함수를 호출한 후에 해당 함수를 불러들여야지 적용이 된다.
     public static void applyMove(Pos playerPos, Pos prevPos, Model model){
         prevPos.setValue(playerPos.x,playerPos.y);
         model.our.get(prevPos.y).get(prevPos.x).type = Define.AIR;
         playerPos.setValue(movePos.x, movePos.y);
         model.our.get(playerPos.y).get(playerPos.x).type = Define.PLAYER;
     }
+
+    // 현재 위치가 BranchBlock이 아니라는 가정이 필요
+    // 길이 2개가 있을 때 이전 위치가 아닌 이동할 방향을 리턴
     public static Pos moveAround(Pos playerPos, Pos prevPos, Model model) {
-        // AIR라는 가정이 필수!! 잊지말기!!
         movePos.setValue(playerPos.x, playerPos.y);
         for (Pos p : Define.moveBoundary) {
             look.setValue(playerPos.x, playerPos.y);
@@ -133,6 +141,7 @@ public class MapUtil {
         return null;
     }
 
+    // 해당 방향이 이동할 수 있는 공간인지 판단하는데 사용하는 함수
     public static boolean isAir(Pos playerPos, Define.Direction direction, Model model){
         look.setValue(0,0);
         if(direction == Define.Direction.RIGHT)
@@ -153,8 +162,8 @@ public class MapUtil {
         return false;
     }
 
+    // 현재 위치에서 해당 방향이 이동할 수 있는 블럭일 경우 위치 반환
     public static Pos moveDirection(Pos playerPos, Define.Direction direction, Model model) {
-        // direction 방향의 Block이 아니라는 가정이 필수!! 잊지말기!!
         look.setValue(playerPos.x, playerPos.y);
         if(direction == Define.Direction.UP)
             look.y += -1;
@@ -171,6 +180,7 @@ public class MapUtil {
         return movePos;
     }
 
+    // 현재 위치에서 해당 방향의 위치 반환
     public static Pos DirectionPosition(Pos playerPos, Define.Direction direction, Model model) {
         look.setValue(playerPos.x, playerPos.y);
         if(direction == Define.Direction.UP)
@@ -186,6 +196,7 @@ public class MapUtil {
         return movePos;
     }
 
+    // 목적지를 찾았는지 확인하는 함수
     public static Pos CheckFindGoal(Pos goal, Model model){
         if(goal != null)
             return null;
@@ -206,6 +217,7 @@ public class MapUtil {
         return goal;
     }
 
+    // 맵이 이동할 수 있는 곳이 있는지 판단하는 함수.
     public static boolean cantFindOut(Model model){
         int col = model.getCol();
         int row = model.getRow();

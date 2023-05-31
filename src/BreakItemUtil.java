@@ -3,12 +3,20 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 public class BreakItemUtil {
+
+    // goal 주변 벽을 부수는 범위 조정 (맵 크기에 비례)
     private static double breakBlockRatio = 0.3;
+
+    // 메모리 최적화를 위해 Pool 사용
     private static Pool.PosPool posPool = new Pool.PosPool();
 
+    // goal을 찾았다는 가정이 존재.
+    // goal 주변에 존재하는 벽을 하나씩 부수면서 다익스트라 알고리즘을 통해
+    // goal로 이동할 수 있는지 판단하는 알고리즘
+    // 너무 많은 시간을 소요되는 것을 방지하기 위해서, 해당 알고리즘의 수행 시간이 길수록
+    // 다음에 함수 호출 시 goal 주변에 부시는 범위를 줄인다.
     public static boolean isGoodBreak(Pos goal , Game game, Model model){
         long beforeTime = System.currentTimeMillis();
-        // goal 찾았다는 가정이 들어감.
         System.out.println("BreakItem 사용 여부 판단 중..");
 
         Stack<Pos> wallList = new Stack<>();
@@ -68,9 +76,13 @@ public class BreakItemUtil {
         long afterTime = System.currentTimeMillis(); 
         long secDiffTime = (afterTime - beforeTime); 
         if(secDiffTime > 1000) // 프로그램 속도가 너무 느려지는 것을 방지하기 위해서 block break rotaio 조정
-            breakBlockRatio = Math.max(0.1, breakBlockRatio - 0.05);
+            breakBlockRatio = Math.max(0.1, breakBlockRatio - 0.05) < breakBlockRatio ? Math.max(0.1, breakBlockRatio - 0.05) : breakBlockRatio;
         if(secDiffTime > 10000)
-            breakBlockRatio = 0.05;
+            breakBlockRatio = 0.05 < breakBlockRatio ? 0.05 : breakBlockRatio;
+        if(secDiffTime > 20000)
+            breakBlockRatio = 0.01 < breakBlockRatio ? 0.01 : breakBlockRatio;
+        if(secDiffTime > 30000)
+            breakBlockRatio = 0.001 < breakBlockRatio ? 0.001 : breakBlockRatio;
 
         if(dest != null){
             for (Define.Direction direction : dest.directions) {

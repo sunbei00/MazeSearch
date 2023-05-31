@@ -7,6 +7,8 @@ import java.util.Iterator;
 
 
 public class Model {
+    // 데이터 관련 입출력 함수
+
     private String readPath = null;
     private String writePath = null;
     private int row = -1;
@@ -22,14 +24,11 @@ public class Model {
         this.readPath = readPath;
         this.writePath = writePath;
     }
-    public void setReadPath(String readPath){
-        this.readPath = readPath;
-    }
     public void setWritePath(String writePath){
         this.writePath = writePath;
     }
 
-
+    // 맵 파일을 읽는 함수
     public void fileRead() {
         try{
             if(this.readPath == null)
@@ -65,6 +64,7 @@ public class Model {
     }
 
 
+    // OurMap을 만드는 함수
     public void buildOur(){
         try{
             if(readPath == null)
@@ -81,7 +81,7 @@ public class Model {
 
             while(true){
                 game.Move();
-                //System.out.println(game.getEnergy());
+                System.out.println(game.getEnergy());
 
 
                 /*
@@ -122,6 +122,7 @@ public class Model {
         }
     }
 
+    // 이미지 파일로 맵을 시각화해주는 함수
     public void ImgWrite(Define.ImgOutput imgOutput){
         try{
             if(this.writePath == null)
@@ -195,6 +196,7 @@ public class Model {
         return this.col;
     }
 
+    // 결과 출력해주는 함수 
     public void resultWrite(int remainEnergy, ArrayList<ArrayList<Boolean>> bestWay){
 
         int initialEnergy = getCol()*getRow()*2;
@@ -217,6 +219,7 @@ public class Model {
         System.out.println("ratio with wasted energy and best way energy : " + ((double)(initialEnergy - remainEnergy) / bestWayUsingEnergy));
         System.out.println("Insert File Name : " + readPath + "\n\n");
         System.out.println();
+
 
         if(bestWay != null){
             int row = getRow();
@@ -268,6 +271,7 @@ public class Model {
         }
     }
 
+    // 결과와 이미지를 출력해주는 함수
     public void printImageSet(int remainEnergy, Pos playerPos, Pos breakPos, Pos goal, boolean isGoal){
         if(playerPos != null)
             our.get(playerPos.y).get(playerPos.x).type = Define.PLAYER;

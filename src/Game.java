@@ -3,20 +3,28 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 public class Game {
-    private int energy;
-    private float mana;
-    private boolean breakItem;
-    public Pos breakPos;
+    private int energy; // 남은 체력
+    private float mana; // 현재 마나
+    private boolean breakItem; // breakItem 사용 여부
+    public Pos breakPos; // breakItem을 사용한 위치
     private Model model;
-    public Pos playerPos = new Pos();
-    public Pos prevPos = new Pos(); // Temp for move
-    public Pos goal = null;
-    public BranchBlockGraph branchBlockGraph;
-    public ArrayList<Pos> addBranchBlockPos = new ArrayList<>();
+    public Pos playerPos = new Pos(); // 플레이어의 위치
+    public Pos prevPos = new Pos(); // 플레이어의 이동을 위해 이전에 이동한 위치
+    public Pos goal = null; // 목적지의 위치
+    public BranchBlockGraph branchBlockGraph; // Branch Block에서 Branch Block으로 이동하기 위해 Branch Block 간의 그래프
 
+    // 스캔을 사용하여 골을 찾았을시 현재 위치를 Branch Block으로 만들어야지 이동할 수 있기 때문에 
+    // 현재 위치가 Branch Block이 아니어도 임의로 추가하기 위한 정보 저장
+    // 외에도 Break Item을 사용했을 때 Branch Graph의 문제를 해결하는데도 사용
+    public ArrayList<Pos> addBranchBlockPos = new ArrayList<>(); 
+
+    // goal을 찾고 체력의 1%를 소요할 때마다 BreakItem 사용 여부 판단
     private int usingItemFrequency = 101;
-    private int checkEnd = 70;
+    
+    // 에너지가 80% 이하로 떨어질 경우 갇혔는지 판단하는데 사용
+    private int checkEnd = 80;
 
+    // 스캔 우선순위 계산을 위해서
     private Priority.ScanPriority scanPriority;
 
     public int getEnergy() {
@@ -39,7 +47,7 @@ public class Game {
             return;
         this.energy--;
     }
-    public void increaseMana(){
+    public void increaseMana() {
         this.mana += 0.1f;
         if(this.mana >= 3.0f)
             this.mana = 3.0f;
@@ -69,6 +77,7 @@ public class Game {
             useBreak(new Pos(1,1));
     }
 
+    // Branch Block에서 Branch Block으로 이동할 때 우선순위 계산 후 해당 경로로 이동
     private void calculatePriorityAndMove(){
 
         branchBlockGraph.clear();
@@ -166,8 +175,10 @@ public class Game {
             MapUtil.checkFinish(playerPos ,breakPos, goal ,energy ,model);
         }
     }
+
+    // Branch Block이 아니라는 가정이 들어간다. (move boundary에 이동할 수 있는 경로가 2개라는 가정)
+    // 현재 위치에서 이동할 수 있는 경로 중 이전에 이동한 경로가 아닌 곳으로 이동한다.
     public void Move(){
-        // GAME OVER : 우선순위 계산 할 Branch가 미존재 할 시 (우선순위에서 계산해야 할 듯)
         MapUtil.checkFinish(playerPos, breakPos, goal ,energy ,model);
         Pos goalPos = MapUtil.CheckFindGoal(goal, model); // goal 변수에 넣어주기위해서 목적지를 찾았는지 확인하는 과정
         if(goalPos != null){
@@ -207,6 +218,7 @@ public class Game {
         }
     }
 
+    // 맵을 그리드로 나누고 그리드 중 우선순위가 높은 지역에 scan을 한다.
     public boolean useScanWithScanPriority(){
         if(isMana()){
             // 스캔 우선 순위 계산
@@ -221,6 +233,8 @@ public class Game {
         }
         return false;
     }
+
+    // 스캔을 진행한다.
     public boolean useScan(int x, int y){
         Pos look = new Pos();
         for(Pos p : Define.sacnBoundary){
@@ -247,6 +261,8 @@ public class Game {
         }
         return true;
     }
+
+    // break Item을 사용한다.
     public boolean useBreak(Pos pos){
         if(!isBreakItem())
             return false;

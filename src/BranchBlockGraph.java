@@ -4,8 +4,16 @@ import java.util.HashMap;
 import java.util.Stack;
 
 public class BranchBlockGraph {
-    private Stack<AbstractMap.SimpleEntry<Pos, Pos>> posPairList = new Stack<>(); // key : prev, value : current
+    // Our Map에서 Branch Block의 조건에 만족하는 위치에 Branch Blcok을 만들고 Branch Block을 연결하여 graph 형식으로 만든다.
+
+    // dfs를 진행하는데 이전 위치와 현재 위치를 기반으로 이동하기 때문에 이전 위치와 현재 위치 저장
+    // key : prev, value : current
+    private Stack<AbstractMap.SimpleEntry<Pos, Pos>> posPairList = new Stack<>(); 
+    
+    // Branch Block Graph를 연결하기 위해서 이전 Branch Block과 어느 방향으로 이동했는지 저장
     private Stack<Pool.LinkPool.Link> linkList = new Stack<>();
+    
+    // 메모리 최적화를 위한 Pool Class 사용
     private Pool.PosPairPool posPairPool = new Pool.PosPairPool();
     private Pool.LinkPool linkPool = new Pool.LinkPool();
     Model model = null;
@@ -33,6 +41,7 @@ public class BranchBlockGraph {
                 graphMap.get(y).get(x).setFalse();
     }
 
+    // 재사용성을 위해 초기화
     public void clear(){
         clearGraphMap();
         branchBlockHashMap.clear();
@@ -40,10 +49,13 @@ public class BranchBlockGraph {
         posPairList.clear();
     }
 
+    // 중복 제거
     public void addHashMap(Pos pos){
         if(!branchBlockHashMap.containsKey(pos.hashCode()))
             branchBlockHashMap.put(pos.hashCode(), new BranchBlock(pos.x, pos.y));
     }
+
+    // Branch Block의 조건에 맞는 Branch Block의 위치 branchBlockHashMap에 저장
     public void checkBranchBlock(){
         clear();
         AbstractMap.SimpleEntry<Pos, Pos> pos = posPairPool.get(); // key : prev, value : current
@@ -97,6 +109,9 @@ public class BranchBlockGraph {
             }
         }
     }
+
+    // branchBlockHashmap에 저장된 Brnach Block 간의 연결관계를 파악 후 Graph 형식으로 저장.
+    // 후에 다익스트라 연산에 사용
     public BranchBlock buildGraph(){
         clearGraphMap();
         Pool.LinkPool.Link link = linkPool.get();

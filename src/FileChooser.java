@@ -3,6 +3,7 @@ import java.io.File;
 
 public class FileChooser {
 
+    // 프로그램 실행 시 파일을 선택하기 위한 GUI
     public static String chooseFile(){
 
         JFileChooser fileChooser = new JFileChooser();

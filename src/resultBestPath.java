@@ -1,8 +1,13 @@
 import java.util.ArrayList;
 
 public class resultBestPath {
+    // 현재까지 밝혀낸 맵에서 최적의 경로를 알기 위한 클래스.
+    
     private static Pos playerPos;
     private static Pos prevPos;
+
+
+    // 현재까지 밝혀낸 맵에서 최적의 경로를 알기 위한 함수.
     public static ArrayList<ArrayList<Boolean>> BestWay(Pos goal,Model model){
 
         ArrayList<ArrayList<Boolean>> result = new ArrayList<>();

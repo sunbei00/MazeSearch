@@ -1,4 +1,6 @@
 public class Pos {
+    // 이미지 좌표계에서 특정 위치를 저장하기 위한 클래스
+    
     public int x;
     public int y;
 
