@@ -90,8 +90,8 @@ public class Game {
 
         // Branch 우선 순위 계산 및 경로로 이동
         Route route = new Route(branchBlockGraph.branchBlockHashMap);
-        route.SetList();
-        ArrayList<DestInfo> destInfos = route.Dijkstra(branchBlockGraph.branchBlockHashMap.get(playerPos.hashCode()));
+        route.setList();
+        ArrayList<DestInfo> destInfos = route.dijkstra(branchBlockGraph.branchBlockHashMap.get(playerPos.hashCode()));
         // 어느 방향으로 이동했는지에 대해서도 저장을 해야한다,
 
         Priority.BranchPriority priority = new Priority.BranchPriority(model, destInfos, goal);

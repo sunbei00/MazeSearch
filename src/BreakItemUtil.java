@@ -55,8 +55,8 @@ public class BreakItemUtil {
 
             BranchBlock head = game.branchBlockGraph.buildGraph();
             Route route = new Route(game.branchBlockGraph.branchBlockHashMap);
-            route.SetList();
-            ArrayList<DestInfo> destInfos = route.Dijkstra(game.branchBlockGraph.branchBlockHashMap.get(game.playerPos.hashCode()));
+            route.setList();
+            ArrayList<DestInfo> destInfos = route.dijkstra(game.branchBlockGraph.branchBlockHashMap.get(game.playerPos.hashCode()));
 
             for(DestInfo destInfo : destInfos)
                 if(destInfo.branchBlock.x == goal.x && destInfo.branchBlock.y == goal.y)

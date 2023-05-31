@@ -18,14 +18,14 @@ public class Route {
     }
 
     //해쉬맵의 브랜치 블록을 ArrayList로 저장
-    public void SetList() {
+    public void setList() {
         branchList.clear();
         for (BranchBlock b : branchBlockHashMap.values()) branchList.add(b);
     }
 
     //PriorityQueue를 사용한 다익스트라 연산
     //PriorityQueue는 DestInfo.distance를 우선순위로 계산
-    public ArrayList<DestInfo> Dijkstra (BranchBlock start) {
+    public ArrayList<DestInfo> dijkstra (BranchBlock start) {
         int INT = Integer.MAX_VALUE;
         int size = branchList.size();
         boolean[] isChecked = new boolean[size];
