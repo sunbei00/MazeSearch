@@ -70,7 +70,7 @@ public class Define {
     };
 
     // 방향을 넘겨주기 위한 enum
-    static enum Direction {
+    enum Direction {
         UP,
         DOWN,
         LEFT,

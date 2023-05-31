@@ -104,6 +104,7 @@ public class BreakItemUtil {
                 if(model.our.get(tmp.y).get(tmp.x).type == Define.WALL){
                     if(!game.useBreak(new Pos(tmp.x,tmp.y))){
 
+                        // Our Map에서 Branch Block의 조건에 만족하는 위치에 Branch Blcok을 만들고 Branch Block을 연결하여 graph 형식으로 만든다.
                         model.setWritePath("./Our" + ".bmp");
                         // brabch block
                         for(BranchBlock b : game.branchBlockGraph.branchBlockHashMap.values()){
