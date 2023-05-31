@@ -83,37 +83,6 @@ public class Model {
                 game.Move();
                 System.out.println(game.getEnergy());
 
-
-                /*
-                 // path 사진으로 출력
-                File Folder = new File("path");
-                if (!Folder.exists()) {
-                    try{
-                        Folder.mkdir(); //폴더 생성합니다.
-                        System.out.println("폴더가 생성되었습니다.");
-                    }
-                    catch(Exception e){
-                        e.getStackTrace();
-                    }
-                }
-                setWritePath("./path/Our" + moveFunctionCallCount + ".bmp");
-                // brabch block
-                BranchBlockGraph bbg = new BranchBlockGraph(this);
-                bbg.clear();
-                our.get(game.playerPos.y).get(game.playerPos.x).type = Define.AIR; // for build graph
-                bbg.checkBranchBlock();
-                bbg.buildGraph();
-                our.get(game.playerPos.y).get(game.playerPos.x).type = Define.PLAYER; // for build graph
-
-                for(BranchBlock b : bbg.branchBlockHashMap.values()){
-                    our.get(b.y).get(b.x).type = Define.BRANCH_BLOCK;
-                }
-                ImgWrite(Define.ImgOutput.Our);
-                for(BranchBlock b : bbg.branchBlockHashMap.values()){
-                    our.get(b.y).get(b.x).type = Define.AIR;
-                }
-
-                */
             }
 
         }catch (IOException e){

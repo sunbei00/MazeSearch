@@ -37,7 +37,7 @@ public class resultBestPath {
         BranchBlock head = branchBlockGraph.buildGraph();
 
         // Branch 우선 순위 계산 및 경로로 이동
-        Route route = new Route(head, playerPos, branchBlockGraph.branchBlockHashMap);
+        Route route = new Route(branchBlockGraph.branchBlockHashMap);
         route.SetList();
         ArrayList<DestInfo> destInfos = route.Dijkstra(branchBlockGraph.branchBlockHashMap.get(playerPos.hashCode()));
 

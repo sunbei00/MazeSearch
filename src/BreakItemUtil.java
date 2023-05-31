@@ -54,7 +54,7 @@ public class BreakItemUtil {
                 game.branchBlockGraph.addHashMap(MapUtil.DirectionPosition(wallPos, Define.Direction.RIGHT,model));
 
             BranchBlock head = game.branchBlockGraph.buildGraph();
-            Route route = new Route(head, game.playerPos, game.branchBlockGraph.branchBlockHashMap);
+            Route route = new Route(game.branchBlockGraph.branchBlockHashMap);
             route.SetList();
             ArrayList<DestInfo> destInfos = route.Dijkstra(game.branchBlockGraph.branchBlockHashMap.get(game.playerPos.hashCode()));
 
