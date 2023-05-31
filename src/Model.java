@@ -79,13 +79,12 @@ public class Model {
 
             Game game = new Game(this);
 
-            int moveFunctionCallCount=0;
             while(true){
                 game.Move();
                 //System.out.println(game.getEnergy());
 
 
-
+                /*
                  // path 사진으로 출력
                 File Folder = new File("path");
                 if (!Folder.exists()) {
@@ -114,11 +113,7 @@ public class Model {
                     our.get(b.y).get(b.x).type = Define.AIR;
                 }
 
-
-
-
-
-                moveFunctionCallCount++;
+                */
             }
 
         }catch (IOException e){
@@ -201,19 +196,53 @@ public class Model {
     }
 
     public void resultWrite(int remainEnergy, ArrayList<ArrayList<Boolean>> bestWay){
+
+        int initialEnergy = getCol()*getRow()*2;
+        int bestWayUsingEnergy = 0;
+        if(bestWay != null){
+            int row = getRow();
+            int col = getCol();
+            for(int i=0; i<row; i++)
+                for(int j=0; j<col; j++)
+                    if(bestWay.get(i).get(j))
+                        bestWayUsingEnergy++;
+        }
+
+
+        System.out.println();
+        System.out.println("Initial Energy : " + initialEnergy);
+        System.out.println("Wasted Energy : " + (initialEnergy - remainEnergy));
+        System.out.println("Remain Energy : " + remainEnergy);
+        System.out.println("using Energy in best way : " + bestWayUsingEnergy);
+        System.out.println("ratio with wasted energy and best way energy : " + ((double)(initialEnergy - remainEnergy) / bestWayUsingEnergy));
+        System.out.println("Insert File Name : " + readPath + "\n\n");
+        System.out.println();
+
+        if(bestWay != null){
+            int row = getRow();
+            int col = getCol();
+            for(int i=0; i<row; i++){
+                for(int j=0; j<col; j++)
+                    if(bestWay.get(i).get(j))
+                        System.out.print("1");
+                    else
+                        System.out.print(" ");
+                System.out.println();
+            }
+        }
+
         try{
             if(this.writePath == null)
                 throw new IOException("Need to set variable 'wrtiePath'");
             FileWriter fileWriter = new FileWriter(this.writePath);
 
-            int initialEnergy = getCol()*getRow()*2;
 
             fileWriter.write("Initial Energy : " + initialEnergy + "\n");
             fileWriter.write("Wasted Energy : " + (initialEnergy - remainEnergy) + "\n");
             fileWriter.write("Remain Energy : " + remainEnergy + "\n");
+            fileWriter.write("using Energy in best way : " + bestWayUsingEnergy + "\n");
+            fileWriter.write("ratio with wasted energy and best way energy : " + ((double)(initialEnergy - remainEnergy) / bestWayUsingEnergy) + "\n");
             fileWriter.write("Insert File Name : " + readPath + "\n\n");
-
-
 
             if(bestWay != null){
                 int row = getRow();
@@ -231,25 +260,7 @@ public class Model {
             fileWriter.flush();
             fileWriter.close();
 
-            System.out.println();
-            System.out.println("Initial Energy : " + initialEnergy);
-            System.out.println("Wasted Energy : " + (initialEnergy - remainEnergy));
-            System.out.println("Remain Energy : " + remainEnergy);
-            System.out.println("Insert File Name : " + readPath + "\n\n");
-            System.out.println();
 
-            if(bestWay != null){
-                int row = getRow();
-                int col = getCol();
-                for(int i=0; i<row; i++){
-                    for(int j=0; j<col; j++)
-                        if(bestWay.get(i).get(j))
-                            System.out.print("1");
-                        else
-                            System.out.print(" ");
-                    System.out.println();
-                }
-            }
 
         }catch (IOException e){
             e.printStackTrace();
