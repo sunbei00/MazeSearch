@@ -34,7 +34,7 @@ public class Priority {
             return 100 * Math.atan(a * input-mid);
         }
 
-        private void updatePriority(DestInfo destInfo, Orientation udlr, Define.Direction direction, double goalDistance, int wall_distance, int dest_distance) {
+        private void updatePriority(DestInfo destInfo, Orientation udlr, Define.Direction direction, double goalDistance, int wallDistance, int destDistance) {
             Pos branchBlockPos = new Pos(destInfo.branchBlock.x, destInfo.branchBlock.y);
 
             //브랜치 상하좌우 길이 있는지 & 갔던 길인지 판단
@@ -44,8 +44,8 @@ public class Priority {
                     udlr.priority = Integer.MIN_VALUE + 1;
                 else {
                     double goalPriority = goalDistance * goalDistance * 100; //BranchBlock과 골까지의 거리
-                    double destPriority = dest_distance * dest_distance; //BranchBlock과 현재 위치와의 거리
-                    double wallPriority = wallPriorityCalculate(wall_distance); //BranchBlock과 외벽과의 거리
+                    double destPriority = destDistance * destDistance; //BranchBlock과 현재 위치와의 거리
+                    double wallPriority = wallPriorityCalculate(wallDistance); //BranchBlock과 외벽과의 거리
 
                     udlr.priority = - goalPriority - destPriority - wallPriority; //우선순위 부여
                 }
@@ -156,7 +156,7 @@ public class Priority {
 
         //맵의 정보를 모르는 곳, unknown 비율 체크
         public int checkUnknown(ScanPoint point) {
-            int unknown_count = 0;
+            int unknownCount = 0;
             for (Pos p : Define.sacnBoundary) {
                 Pos look = new Pos(point.x, point.y); //스캔할 지역의 중심좌표, new 생성
 
@@ -167,11 +167,11 @@ public class Priority {
 
                 //unknown block count
                 if(our.get(look.y).get(look.x).type == Define.UNKNOWN){
-                    unknown_count++;
+                    unknownCount++;
                 }
             }
 
-            return unknown_count;
+            return unknownCount;
         }
         private double unknownPriorityCalculate(double input){
             double rangeStart = 0;
@@ -191,9 +191,9 @@ public class Priority {
             int yDiff = point.y - symY;
             double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
 
-            int min_x = Math.min(point.x, col-1-point.x); //스캔그리드와 왼쪽, 오른쪽 외벽까지의 최소 거리
-            int min_y = Math.min(point.y, row-1-point.y); //스캔그리드와 위, 아래 외벽까지의 최소 거리
-            int wallDistance = Math.min(min_x, min_y); //외벽까지의 최소 거리
+            int minX = Math.min(point.x, col-1-point.x); //스캔그리드와 왼쪽, 오른쪽 외벽까지의 최소 거리
+            int minY = Math.min(point.y, row-1-point.y); //스캔그리드와 위, 아래 외벽까지의 최소 거리
+            int wallDistance = Math.min(minX, minY); //외벽까지의 최소 거리
 
             double wallPriority = 1000 * wallDistance;
             double unknownPriority = unknownPriorityCalculate(checkUnknown(point));
